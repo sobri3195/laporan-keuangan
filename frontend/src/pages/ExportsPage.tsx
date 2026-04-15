@@ -1,4 +1,5 @@
 import { reports } from '../mocks/seedData';
+import { MonitoringExcelExportButtons } from '../features/reports/export/MonitoringExcelExportButtons';
 
 const exportFormats = [
   { id: 'xlsx', label: 'Export Excel (.xlsx)' },
@@ -18,6 +19,11 @@ export default function ExportsPage() {
 
       <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
         Total laporan tersedia: <span className="font-semibold">{totalReports}</span>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 p-4">
+        <h3 className="mb-2 text-sm font-semibold text-slate-700">Template Monitoring Keuangan RS</h3>
+        <MonitoringExcelExportButtons />
       </div>
 
       <div className="grid gap-2 md:grid-cols-3">
