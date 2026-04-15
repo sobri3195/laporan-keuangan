@@ -8,16 +8,19 @@ type SidebarProps = {
 };
 
 const navs = [
-  ['/dashboard', 'Dashboard'],
-  ['/dashboard/executive', 'Executive'],
-  ['/reports', 'Reports'],
-  ['/monitoring', 'Monitoring'],
-  ['/master/hospitals', 'Master Hospitals'],
-  ['/master/users', 'Master Users'],
-  ['/master/periods', 'Master Periods'],
-  ['/notifications', 'Notifications'],
-  ['/audit-logs', 'Audit Logs'],
-  ['/profile', 'Profile']
+  ['/dashboard', 'Dashboard utama'],
+  ['/reports/pnbp/new', 'Data input PNBP'],
+  ['/reports/blu/new', 'Data input BLU'],
+  ['/reports', 'Daftar laporan'],
+  ['/monitoring', 'Monitoring status RS'],
+  ['/approvals', 'Approval & revisi'],
+  ['/master/hospitals', 'Master data RS'],
+  ['/master/users', 'Master user'],
+  ['/master/periods', 'Pengaturan periode'],
+  ['/exports', 'Laporan & export'],
+  ['/audit-logs', 'Audit trail'],
+  ['/profile', 'Profil pengguna'],
+  ['/notifications', 'Notifikasi']
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {

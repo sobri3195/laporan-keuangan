@@ -15,6 +15,8 @@ import MasterPeriodsPage from '../pages/MasterPeriodsPage';
 import NotificationsPage from '../pages/NotificationsPage';
 import AuditLogsPage from '../pages/AuditLogsPage';
 import ProfilePage from '../pages/ProfilePage';
+import ApprovalsPage from '../pages/ApprovalsPage';
+import ExportsPage from '../pages/ExportsPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -33,6 +35,8 @@ export const router = createBrowserRouter([
           { path: '/reports/:id', element: <ReportDetailPage /> },
           { path: '/reports/:id/edit', element: <ReportFormPage /> },
           { path: '/monitoring', element: <MonitoringPage /> },
+          { path: '/approvals', element: <ApprovalsPage /> },
+          { path: '/exports', element: <ExportsPage /> },
           { path: '/notifications', element: <NotificationsPage /> },
           { path: '/audit-logs', element: <AuditLogsPage /> },
           { path: '/profile', element: <ProfilePage /> }
