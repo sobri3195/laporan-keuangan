@@ -1,0 +1,34 @@
+# DATABASE_SCHEMA (Google Sheets Logical Tables)
+
+## users
+`id, full_name, email, role, hospital_id, is_active, created_at, updated_at`
+
+## hospitals
+`id, code, name, province, city, class_type, active, created_at, updated_at`
+
+## periods
+`id, label, year, month, start_date, end_date, is_locked, is_active`
+
+## report_submissions
+`id, hospital_id, period_id, entity_type, status, completeness_score, validity_score, anomaly_flags_json, submitted_at, approved_at, updated_at`
+
+## report_pnbp_details
+`report_id, pendapatan, pengeluaran, sisa_saldo, piutang, persediaan, aset_lancar, hutang, ekuitas, current_ratio, cash_ratio`
+
+## report_blu_details
+`report_id, saldo_awal, pendapatan, pengeluaran, sisa_saldo_akhir, piutang, persediaan, aset_lancar, hutang, ekuitas, current_ratio, cash_ratio`
+
+## revision_comments
+`id, report_id, reviewer_id, comment, created_at`
+
+## audit_logs
+`id, timestamp, actor_user_id, action, entity, entity_id, before_json, after_json`
+
+## notifications
+`id, user_id, title, message, is_read, created_at, read_at`
+
+## attachments
+`id, report_id, drive_file_id, filename, mime_type, uploaded_by, uploaded_at`
+
+## system_configs
+`key, value, meta, updated_at`
