@@ -1,9 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, LoginSchema } from '../schemas/authSchema';
-import { login } from '../features/auth/api';
+import { getDemoPassword, login } from '../features/auth/api';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
+import { users } from '../mocks/seedData';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -41,7 +42,19 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-4 text-center text-xs text-slate-500">Akses login tersedia di bagian bawah form agar mudah ditemukan di mobile.</p>
+        <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+          <p className="font-semibold text-slate-700">Akun demo tersedia:</p>
+          <ul className="mt-1 list-inside list-disc space-y-0.5">
+            {users.map((user) => (
+              <li key={user.id}>
+                {user.email} ({user.role})
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2">
+            Password demo: <span className="font-semibold">{getDemoPassword()}</span>
+          </p>
+        </div>
       </div>
     </div>
   );
