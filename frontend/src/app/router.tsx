@@ -9,8 +9,6 @@ import ReportsPage from '../pages/ReportsPage';
 import ReportFormPage from '../pages/ReportFormPage';
 import ReportDetailPage from '../pages/ReportDetailPage';
 import MonitoringPage from '../pages/MonitoringPage';
-import MasterHospitalsPage from '../pages/MasterHospitalsPage';
-import MasterUsersPage from '../pages/MasterUsersPage';
 import MasterPeriodsPage from '../pages/MasterPeriodsPage';
 import NotificationsPage from '../pages/NotificationsPage';
 import AuditLogsPage from '../pages/AuditLogsPage';
@@ -47,8 +45,6 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT]} />,
         children: [
-          { path: '/master/hospitals', element: <MasterHospitalsPage /> },
-          { path: '/master/users', element: <MasterUsersPage /> },
           { path: '/master/periods', element: <MasterPeriodsPage /> }
         ]
       }
