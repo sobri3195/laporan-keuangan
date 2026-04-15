@@ -8,7 +8,7 @@
 5. Set env `VITE_API_BASE_URL` ke URL Apps Script Web App.
 
 ## Apps Script
-1. Buat Apps Script project dan copy file dari `backend-apps-script`.
+1. Buat Apps Script project dan copy file dari `apps-script`.
 2. Set `CONFIG.SHEET_ID`.
 3. Deploy > New Deployment > Web App.
 4. Execute as: Me, Access: sesuai kebutuhan organisasi.
