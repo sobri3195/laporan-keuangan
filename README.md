@@ -8,12 +8,12 @@ SIMON Keuangan RS (Sistem Monitoring Laporan Keuangan Rumah Sakit) adalah fondas
 - `docs/`: PRD, schema, TSD, API, deployment, UAT.
 
 ## Fitur Inti
-- Login + protected route + role-based access (`ADMIN_PUSAT`, `ADMIN_RS`, `VIEWER`).
+- Login + remember session (persisted) + protected route + role-based access (`ADMIN_PUSAT`, `ADMIN_RS`, `VIEWER`).
 - Master data: hospitals, users, periods.
 - Report lifecycle: draft, submit, review, revision, approval.
 - Dashboard KPI, trend, ranking, anomali, monitoring compliance.
 - Notification dan audit logs.
-- Formula PNBP/BLU dengan safe divide (`N/A` jika pembagi nol).
+- Formula PNBP/BLU dengan safe divide (`N/A` jika pembagi nol), autosave draft form, warning validasi rasio hutang=0, dan upload lampiran opsional.
 
 ## Quick Start
 1. Copy `.env.example` to `.env`.

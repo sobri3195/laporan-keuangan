@@ -17,9 +17,11 @@ import AuditLogsPage from '../pages/AuditLogsPage';
 import ProfilePage from '../pages/ProfilePage';
 import ApprovalsPage from '../pages/ApprovalsPage';
 import ExportsPage from '../pages/ExportsPage';
+import UnauthorizedPage from '../pages/UnauthorizedPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/unauthorized', element: <UnauthorizedPage /> },
   {
     element: <ProtectedRoute />,
     children: [
