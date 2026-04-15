@@ -1,4 +1,11 @@
 import { NavLink } from 'react-router-dom';
+import clsx from 'clsx';
+import { useAuthStore } from '../../store/authStore';
+
+type SidebarProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
 
 const navs = [
   ['/dashboard', 'Dashboard'],
@@ -13,17 +20,55 @@ const navs = [
   ['/profile', 'Profile']
 ];
 
-export function Sidebar() {
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { user, logout } = useAuthStore();
+
   return (
-    <aside className="w-64 bg-primary text-white min-h-screen p-4">
-      <h1 className="text-lg font-bold">SIMON Keuangan RS</h1>
-      <nav className="mt-4 space-y-1">
-        {navs.map(([to, label]) => (
-          <NavLink key={to} to={to} className="block rounded px-3 py-2 hover:bg-blue-700">
-            {label}
-          </NavLink>
-        ))}
-      </nav>
-    </aside>
+    <>
+      <div
+        className={clsx(
+          'fixed inset-0 z-30 bg-slate-900/50 transition-opacity lg:hidden',
+          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        )}
+        onClick={onClose}
+      />
+      <aside
+        className={clsx(
+          'fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col bg-primary p-4 text-white transition-transform lg:static lg:min-h-screen lg:w-64 lg:translate-x-0',
+          isOpen && 'translate-x-0'
+        )}
+      >
+        <div className="flex items-center gap-3 border-b border-blue-700 pb-3">
+          <img src="/logo-simon.svg" alt="Logo SIMON" className="h-10 w-10 rounded bg-white p-1" />
+          <div>
+            <h1 className="text-base font-bold leading-tight">SIMON Keuangan RS</h1>
+            <p className="text-xs text-blue-100">Kementerian Kesehatan RI</p>
+          </div>
+        </div>
+
+        <nav className="mt-4 flex-1 space-y-1 overflow-y-auto pr-1">
+          {navs.map(([to, label]) => (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={onClose}
+              className={({ isActive }) =>
+                clsx('block rounded px-3 py-2 text-sm hover:bg-blue-700', isActive && 'bg-blue-700 font-semibold')
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="mt-4 border-t border-blue-700 pt-3">
+          <p className="truncate text-sm font-semibold">{user?.fullName}</p>
+          <p className="mb-3 truncate text-xs text-blue-100">{user?.email}</p>
+          <button onClick={logout} className="w-full rounded bg-secondary px-3 py-2 text-sm font-semibold text-white">
+            Keluar
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
