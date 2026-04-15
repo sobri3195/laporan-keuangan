@@ -4,7 +4,7 @@ SIMON Keuangan RS (Sistem Monitoring Laporan Keuangan Rumah Sakit) adalah fondas
 
 ## Struktur Monorepo
 - `frontend/`: React + Vite + TypeScript + Tailwind.
-- `backend-apps-script/`: endpoint Apps Script modular.
+- `apps-script/`: endpoint Apps Script modular.
 - `docs/`: PRD, schema, TSD, API, deployment, UAT.
 
 ## Fitur Inti
@@ -23,7 +23,7 @@ SIMON Keuangan RS (Sistem Monitoring Laporan Keuangan Rumah Sakit) adalah fondas
    - `npm run dev`
 3. Backend Apps Script:
    - Buat Apps Script project.
-   - Copy semua file `.gs` dari `backend-apps-script/`.
+   - Copy semua file `.gs` dari `apps-script/`.
    - Isi `CONFIG.SHEET_ID`.
    - Deploy Web App.
 
