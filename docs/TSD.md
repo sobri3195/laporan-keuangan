@@ -258,6 +258,85 @@ Untuk fase awal:
 - audit semua aksi penting
 - CORS dibatasi ke domain Vercel
 
+## 3.9 Desain Teknis untuk Fitur Lanjutan
+
+### A. Form completeness dan status submit
+- Tambahkan metadata `required_fields` per template form.
+- Backend hitung `completion_percent` + `filled_count/required_count` saat save draft.
+- Endpoint submit menolak request bila `completion_percent < 100` atau validasi gagal.
+
+### B. Freeze periode pasca deadline
+- Tambahkan state period: `OPEN`, `CLOSED`, `LOCKED`.
+- Scheduler (time-driven trigger Apps Script) mengecek period lewat deadline untuk auto-close.
+- Lock final dilakukan ketika semua syarat approval tercapai.
+
+### C. Multi-level approval workflow
+- Gunakan tabel konfigurasi `approval_stages`:
+  - `stage_order`
+  - `role`
+  - `is_required`
+- Tambahkan `current_stage` pada submission.
+- Action approval menggeser ke stage berikutnya hingga final `APPROVED`.
+
+### D. Komentar per field
+- Tambahkan tabel `field_comments` dengan kolom:
+  - `submission_id`
+  - `field_key`
+  - `comment_text`
+  - `status`
+  - `created_by`
+  - `resolved_by`
+- Frontend form menampilkan badge komentar per field.
+
+### E. Rule engine anomali ringan
+- Tambahkan service `anomalyService` dengan rule berbasis threshold.
+- Simpan konfigurasi threshold di `system_configs`.
+- Struktur output rule:
+  - `rule_code`
+  - `severity`
+  - `message`
+  - `metric_value`
+  - `threshold`
+
+### F. Rekap wilayah
+- Tambahkan atribut `region_code` pada master RS.
+- Agregasi dashboard mendukung `groupBy=region|hospital`.
+- Endpoint monitoring menambahkan statistik kepatuhan per wilayah.
+
+### G. Deadline dashboard
+- Tambahkan utilitas `getDeadlineState(now, deadline_at)` yang mengembalikan:
+  - `ON_TRACK`
+  - `DUE_TODAY`
+  - `OVERDUE`
+- Frontend menampilkan countdown real-time berbasis tanggal period aktif.
+
+### H. Draft vs final segregation
+- Pisahkan query:
+  - `reports/drafts` untuk operator
+  - `reports/final` untuk dashboard pusat
+- Semua endpoint agregasi KPI default membaca data final-only.
+
+### I. Import Excel
+- Tambahkan endpoint `POST /imports/reports/excel`.
+- Proses:
+  1. Validasi format file/template.
+  2. Parsing sheet.
+  3. Validasi per baris/kolom.
+  4. Upsert ke draft.
+  5. Return ringkasan sukses/gagal.
+
+### J. API readiness dan migrasi backend
+- Definisikan interface repository generik:
+  - `UserRepository`
+  - `HospitalRepository`
+  - `PeriodRepository`
+  - `ReportRepository`
+- Implementasi awal `SheetsRepositoryAdapter`.
+- Siapkan adapter target:
+  - `PostgresRepositoryAdapter`
+  - `SupabaseRepositoryAdapter`
+  - `FirebaseRepositoryAdapter`
+
 Catatan:
 Jika nanti sistem berkembang, autentikasi sebaiknya dipindah ke yang lebih kuat, misalnya Firebase Auth, Supabase Auth, atau SSO.
 
