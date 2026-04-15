@@ -479,3 +479,302 @@ Contoh `key`:
 - `submission_id` hanya boleh punya satu detail PNBP atau satu detail BLU,
 - `entity_type=PNBP` hanya boleh dipasangkan dengan `report_pnbp_details`,
 - `entity_type=BLU` hanya boleh dipasangkan dengan `report_blu_details`.
+
+## 3. TSD — Technical Specification Document
+
+### 3.1 Arsitektur Umum
+Arsitektur yang dipakai adalah frontend SPA + backend ringan via Apps Script + Google Sheets sebagai storage.
+
+**Layer 1 — Frontend**
+- React
+- Vite
+- Tailwind CSS
+- React Router
+- Zustand
+- React Hook Form
+- Zod
+- Recharts
+
+**Layer 2 — API Layer**
+- Google Apps Script Web App
+- REST-like endpoints
+- validasi server-side
+- kalkulasi dan workflow state handling
+- koneksi ke Google Sheets
+- integrasi ke Gmail/Drive bila perlu
+
+**Layer 3 — Storage**
+- Google Sheets
+- Google Drive untuk file attachment
+- optional `PropertiesService` untuk config rahasia ringan
+
+### 3.2 Arsitektur Modul Frontend
+- **App Shell**
+  - Sidebar
+  - Header
+  - Protected Layout
+  - Public Layout
+- **Auth Module**
+  - login form
+  - session handling
+  - route guard
+  - role permission
+- **Master Data Module**
+  - RS management
+  - user management
+  - period management
+- **Reporting Module**
+  - create/edit report
+  - save draft
+  - submit
+  - revision flow
+  - detail report
+- **Dashboard Module**
+  - KPI cards
+  - charts
+  - filters
+  - benchmarks
+  - anomaly indicators
+- **Monitoring Module**
+  - tabel status pelaporan
+  - completeness
+  - invalid data
+  - overdue submit
+- **Notification Module**
+  - notification bell
+  - dropdown
+  - mark as read
+- **Audit Module**
+  - activity list
+  - change history
+  - filter by user/action/date
+
+### 3.3 Arsitektur Backend Apps Script
+Gunakan pola modular di Apps Script:
+- `router.gs`
+- `auth.gs`
+- `sheetService.gs`
+- `reportService.gs`
+- `dashboardService.gs`
+- `validation.gs`
+- `auditService.gs`
+- `notificationService.gs`
+- `response.gs`
+- `utils.gs`
+
+Tanggung jawab utama:
+- **router**: membaca method dan path, dispatch ke service yang tepat.
+- **auth**: login, session token validation, role authorization.
+- **sheetService**: baca/tulis data dari setiap sheet, helper pencarian row, helper update row by ID.
+- **reportService**: create report, update draft, submit, approve, request revision, recalculate metrics.
+- **dashboardService**: agregasi KPI, generate data chart, monitoring compliance.
+- **validation**: validasi schema input, business rule validation.
+- **auditService**: simpan perubahan ke `audit_logs`.
+- **notificationService**: create notification, email via `MailApp`/`GmailApp`.
+
+### 3.4 Data Flow
+**Flow Input Draft**
+1. Admin RS login.
+2. Ambil master periode aktif dan profil RS.
+3. User isi form.
+4. Frontend validasi.
+5. Frontend kirim ke Apps Script.
+6. Backend validasi ulang.
+7. Backend hitung field turunan.
+8. Data disimpan ke `report_submissions` dan detail.
+9. Audit log dibuat.
+10. Respons sukses dikirim ke frontend.
+
+**Flow Submit Final**
+1. User klik submit.
+2. Backend cek kelengkapan dan validitas.
+3. Status menjadi `SUBMITTED`.
+4. `submitted_at` diisi.
+5. Notifikasi admin pusat dibuat.
+6. Audit log dibuat.
+
+**Flow Review**
+1. Admin pusat buka daftar submitted.
+2. Lihat detail.
+3. Pilih approve atau revisi.
+4. Status diperbarui.
+5. Notifikasi dikirim ke admin RS.
+6. Audit log dibuat.
+
+**Flow Dashboard**
+1. Frontend request dashboard summary.
+2. Backend baca data approved/submitted sesuai filter.
+3. Backend hitung agregat.
+4. Frontend render KPI dan chart.
+
+### 3.5 Formula Bisnis
+**PNBP**
+- `sisa_saldo = pendapatan - pengeluaran`
+- `aset_lancar = sisa_saldo + piutang + persediaan`
+- `ekuitas = aset_lancar - hutang`
+- `current_ratio = hutang > 0 ? aset_lancar / hutang : null`
+- `cash_ratio = hutang > 0 ? sisa_saldo / hutang : null`
+
+**BLU**
+- `sisa_saldo_akhir = saldo_awal + pendapatan - pengeluaran`
+- `aset_lancar = sisa_saldo_akhir + piutang + persediaan`
+- `ekuitas = aset_lancar - hutang`
+- `current_ratio = hutang > 0 ? aset_lancar / hutang : null`
+- `cash_ratio = hutang > 0 ? sisa_saldo_akhir / hutang : null`
+
+Catatan penting:
+- field kosong tetap `null`,
+- jangan fallback ke `0` tanpa alasan bisnis,
+- rasio dengan pembagi nol harus `null` dan ditampilkan `N/A`.
+
+### 3.6 API Contract
+Contoh endpoint:
+
+**Auth**
+- `POST /auth/login`
+- `POST /auth/logout`
+- `GET /auth/me`
+
+**Master Data**
+- `GET /hospitals`
+- `POST /hospitals`
+- `PUT /hospitals/:id`
+- `GET /users`
+- `POST /users`
+- `PUT /users/:id`
+- `GET /periods`
+- `POST /periods`
+- `PUT /periods/:id`
+
+**Reports**
+- `GET /reports`
+- `GET /reports/:id`
+- `POST /reports/pnbp`
+- `PUT /reports/pnbp/:id`
+- `POST /reports/blu`
+- `PUT /reports/blu/:id`
+- `POST /reports/:id/submit`
+- `POST /reports/:id/approve`
+- `POST /reports/:id/request-revision`
+
+**Dashboard**
+- `GET /dashboard/summary`
+- `GET /dashboard/trends`
+- `GET /dashboard/rankings`
+- `GET /monitoring/compliance`
+
+**Others**
+- `GET /notifications`
+- `POST /notifications/:id/read`
+- `GET /audit-logs`
+- `GET /exports/reports`
+
+### 3.7 Frontend State Design
+State utama:
+- `authStore`
+- `periodStore`
+- `filterStore`
+- `reportStore`
+- `dashboardStore`
+- `notificationStore`
+
+Data yang sebaiknya global:
+- current user,
+- active period,
+- sidebar state,
+- dashboard filters,
+- notification count.
+
+### 3.8 Security Design
+Untuk fase awal:
+- password di-hash,
+- token session sederhana,
+- token dikirim via header `Authorization`,
+- endpoint cek role,
+- sanitasi input,
+- whitelist fields update,
+- audit semua aksi penting,
+- CORS dibatasi ke domain Vercel.
+
+Catatan:
+Jika nanti sistem berkembang, autentikasi sebaiknya dipindah ke yang lebih kuat, misalnya Firebase Auth, Supabase Auth, atau SSO.
+
+### 3.9 Performance Considerations
+- cache master data di frontend,
+- paginasi untuk tabel besar,
+- agregasi dashboard dilakukan di backend,
+- hindari baca seluruh sheet untuk setiap request,
+- simpan index row by ID jika perlu,
+- buat sheet archival jika data makin besar,
+- pertimbangkan summary sheet untuk dashboard cepat.
+
+### 3.10 Error Handling
+Standar response:
+
+```json
+{
+  "success": true,
+  "message": "Data berhasil disimpan",
+  "data": {}
+}
+```
+
+Saat gagal:
+
+```json
+{
+  "success": false,
+  "message": "Validasi gagal",
+  "errors": {
+    "pendapatan": "Pendapatan wajib diisi"
+  }
+}
+```
+
+Frontend harus menangani:
+- loading,
+- empty state,
+- error state,
+- retry state.
+
+### 3.11 Logging & Monitoring
+- audit aksi user,
+- log error backend,
+- log request penting,
+- dashboard health minimal untuk admin,
+- optional webhook error ke email admin.
+
+### 3.12 Testing Strategy
+**Frontend**
+- unit test util dan validation,
+- component test untuk form dan table,
+- smoke test navigation.
+
+**Backend**
+- test per endpoint utama,
+- test validasi bisnis,
+- test kalkulasi formula,
+- test workflow status.
+
+**UAT**
+- login role-based,
+- create/edit/submit report,
+- approve/revisi,
+- dashboard sesuai angka,
+- export berjalan.
+
+### 3.13 Deployment
+**Frontend**
+- deploy ke Vercel
+- env:
+  - `VITE_API_BASE_URL`
+  - `VITE_APP_NAME`
+
+**Backend**
+- Apps Script deploy as Web App
+- akses: sesuai kebutuhan domain/publik terbatas
+- simpan Spreadsheet ID di script properties
+
+**Storage**
+- Google Spreadsheet utama
+- Google Drive folder untuk lampiran
