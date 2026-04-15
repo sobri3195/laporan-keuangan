@@ -14,8 +14,6 @@ const navs = [
   ['/reports', 'Daftar laporan'],
   ['/monitoring', 'Monitoring status RS'],
   ['/approvals', 'Approval & revisi'],
-  ['/master/hospitals', 'Master data RS'],
-  ['/master/users', 'Master user'],
   ['/master/periods', 'Pengaturan periode'],
   ['/exports', 'Laporan & export'],
   ['/audit-logs', 'Audit trail'],
