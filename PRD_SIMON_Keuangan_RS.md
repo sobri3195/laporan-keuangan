@@ -778,3 +778,151 @@ Frontend harus menangani:
 **Storage**
 - Google Spreadsheet utama
 - Google Drive folder untuk lampiran
+
+## 4. UX & Product Flow Detail
+
+### 4.1 Sitemap Halaman
+- `/login`
+- `/dashboard`
+- `/monitoring`
+- `/reports/new`
+- `/reports/:id`
+- `/reports/:id/review`
+- `/master/hospitals`
+- `/master/users`
+- `/master/periods`
+- `/audit-logs`
+- `/notifications`
+- `/settings`
+
+### 4.2 Navigasi Berdasarkan Role
+**ADMIN_PUSAT**
+- Dashboard nasional
+- Monitoring submit
+- Review & approval
+- Master data
+- Audit log
+- Export
+
+**ADMIN_RS**
+- Dashboard unit sendiri
+- Input & edit laporan
+- Histori submit dan revisi
+- Notifikasi
+
+**VIEWER**
+- Dashboard read-only
+- Export read-only (opsional sesuai kebijakan)
+
+### 4.3 Alur Form Laporan
+Alur yang direkomendasikan:
+1. Pilih periode aktif.
+2. Pilih jenis entitas (PNBP/BLU jika RS punya lebih dari satu).
+3. Isi field numerik utama.
+4. Sistem menampilkan kalkulasi turunan secara real-time.
+5. Simpan draft.
+6. Jalankan validasi pra-submit.
+7. Submit final.
+
+Prinsip UX:
+- tampilkan satuan rupiah secara konsisten,
+- field wajib diberi indikator jelas,
+- pesan error harus spesifik per field,
+- sediakan riwayat perubahan agar operator mudah menelusuri revisi.
+
+### 4.4 Empty, Loading, dan Error State
+- semua tabel harus memiliki state loading (skeleton/spinner),
+- halaman dashboard harus punya fallback saat data belum tersedia,
+- jika API gagal, tampilkan pesan human-friendly + tombol coba lagi,
+- untuk error validasi, highlight field yang bermasalah dan tampilkan ringkasan di atas form.
+
+## 5. MVP Delivery Plan
+
+### 5.1 Milestone Implementasi
+**Milestone 1 — Foundation (Minggu 1-2)**
+- setup frontend + routing + auth basic,
+- setup Apps Script API dan struktur sheet,
+- implementasi master data awal (RS, user, periode).
+
+**Milestone 2 — Reporting Core (Minggu 3-4)**
+- form input PNBP/BLU,
+- autosave draft,
+- submit final + validasi backend,
+- audit log untuk create/update/submit.
+
+**Milestone 3 — Review & Monitoring (Minggu 5-6)**
+- halaman monitoring submit,
+- flow approval/revisi,
+- notifikasi in-app + email dasar,
+- dashboard ringkas KPI utama.
+
+**Milestone 4 — Stabilization (Minggu 7-8)**
+- hardening validasi dan permission,
+- optimasi performa query sheet,
+- export Excel/CSV,
+- UAT, bugfix, dan pelatihan admin pusat.
+
+### 5.2 Definisi Selesai (Definition of Done)
+Satu fitur dianggap selesai jika:
+- requirement fungsional terpenuhi,
+- lolos test unit/integrasi yang relevan,
+- tercatat pada audit log (jika termasuk aksi penting),
+- memiliki handling error yang jelas,
+- telah diuji minimal oleh 1 admin pusat dan 1 admin RS (untuk fitur lintas role).
+
+## 6. Rencana Operasional & Governance
+
+### 6.1 Operasional Harian
+- admin pusat membuka periode dan memonitor progres submit,
+- admin RS mengisi laporan sebelum deadline,
+- reminder otomatis dikirim H-7, H-3, H-1 deadline,
+- admin pusat melakukan review maksimal H+3 setelah submit,
+- periode ditutup/lock setelah finalisasi nasional.
+
+### 6.2 SLA Layanan
+- respon awal issue kritikal: maksimal 4 jam kerja,
+- bug blocking submit: maksimal 1 hari kerja,
+- bug minor UI: maksimal 3 hari kerja,
+- permintaan enhancement non-kritis: masuk backlog sprint berikutnya.
+
+### 6.3 Kebijakan Backup
+- backup spreadsheet harian (otomatis copy),
+- retensi backup minimal 90 hari,
+- uji restore dilakukan bulanan,
+- file lampiran di Drive mengikuti struktur folder per periode.
+
+## 7. Risiko Lanjutan dan Mitigasi
+
+- **Risiko:** batas kuota Apps Script harian terlampaui.
+  - **Mitigasi:** batching operasi, caching, dan jadwal proses berat di jam non-peak.
+
+- **Risiko:** kualitas internet RS tidak stabil.
+  - **Mitigasi:** autosave berkala + mekanisme retry.
+
+- **Risiko:** perbedaan interpretasi definisi indikator keuangan.
+  - **Mitigasi:** sediakan kamus data (data dictionary) resmi dan pelatihan awal.
+
+- **Risiko:** perubahan regulasi pelaporan.
+  - **Mitigasi:** desain field configurable melalui `system_configs` dan versi template laporan.
+
+## 8. Lampiran
+
+### 8.1 Data Dictionary Ringkas
+Contoh definisi:
+- `pendapatan`: total penerimaan bruto periode berjalan (rupiah).
+- `pengeluaran`: total pengeluaran operasional + non operasional periode berjalan (rupiah).
+- `piutang`: total piutang usaha/layanan hingga akhir periode (rupiah).
+- `persediaan`: nilai persediaan akhir periode (rupiah).
+- `hutang`: total kewajiban jangka pendek yang relevan untuk rasio likuiditas (rupiah).
+
+### 8.2 Format Angka dan Pembulatan
+- penyimpanan data mentah: number tanpa format pemisah ribuan,
+- tampilan UI: format lokal Indonesia (`Rp` + pemisah ribuan),
+- rasio ditampilkan maksimal 2-3 digit desimal,
+- nilai rasio null ditampilkan sebagai `N/A`.
+
+### 8.3 Open Questions (Untuk Sinkronisasi Stakeholder)
+- apakah `VIEWER` boleh mengakses detail per-RS atau hanya agregat?
+- apakah export PDF memerlukan template resmi bertanda tangan?
+- apakah satu RS dapat memiliki multi-user `ADMIN_RS` aktif bersamaan?
+- apakah target fase 2 mencakup integrasi SSO Kemenhan/TNI (jika ada kebijakan)?
