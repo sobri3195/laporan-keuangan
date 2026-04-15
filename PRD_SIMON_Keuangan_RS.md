@@ -250,3 +250,232 @@ Produk dianggap siap MVP jika:
 - approval/revisi berjalan,
 - audit trail tersimpan,
 - export dasar berfungsi.
+
+## 2. Database Scheme
+Karena stack yang dipilih adalah Google Sheets, gunakan logical relational schema berikut. Secara implementasi, tiap tabel menjadi satu sheet.
+
+### 2.1 Prinsip desain
+- semua record punya id unik,
+- gunakan UUID string,
+- hindari formula bisnis inti di sheet,
+- kalkulasi utama dilakukan di backend/frontend,
+- sheet hanya menjadi storage final,
+- gunakan lookup ringan untuk master,
+- audit log dipisah dari tabel transaksi.
+
+### 2.2 Tabel `users`
+Menyimpan akun pengguna.
+
+`users`
+- `id`: string (PK)
+- `username`: string (unique)
+- `password_hash`: string
+- `full_name`: string
+- `email`: string
+- `role`: enum(`ADMIN_PUSAT`, `ADMIN_RS`, `VIEWER`)
+- `rs_id`: string | null
+- `is_active`: boolean
+- `last_login_at`: datetime | null
+- `created_at`: datetime
+- `created_by`: string
+- `updated_at`: datetime
+- `updated_by`: string
+
+Catatan:
+- `rs_id` wajib untuk `ADMIN_RS`,
+- `rs_id` boleh `null` untuk `ADMIN_PUSAT` dan `VIEWER` pusat.
+
+### 2.3 Tabel `hospitals`
+Master rumah sakit/faskes.
+
+`hospitals`
+- `id`: string (PK)
+- `code`: string (unique)
+- `name`: string
+- `entity_type`: enum(`PNBP`, `BLU`)
+- `classification`: string
+- `region`: string
+- `command_unit`: string
+- `city`: string
+- `is_active`: boolean
+- `created_at`: datetime
+- `created_by`: string
+- `updated_at`: datetime
+- `updated_by`: string
+
+### 2.4 Tabel `periods`
+Master periode pelaporan.
+
+`periods`
+- `id`: string (PK)
+- `year`: number
+- `period_type`: enum(`BULANAN`, `TRIWULANAN`, `SEMESTER`, `TAHUNAN`)
+- `period_number`: number
+- `label`: string
+- `start_date`: date
+- `end_date`: date
+- `deadline_at`: datetime
+- `is_open`: boolean
+- `is_locked`: boolean
+- `created_at`: datetime
+- `created_by`: string
+- `updated_at`: datetime
+- `updated_by`: string
+
+Contoh:
+- `TRIWULANAN`, `1`, `TW I 2026`
+
+### 2.5 Tabel `report_submissions`
+Header laporan untuk kedua jenis laporan.
+
+`report_submissions`
+- `id`: string (PK)
+- `period_id`: string (FK -> `periods.id`)
+- `rs_id`: string (FK -> `hospitals.id`)
+- `entity_type`: enum(`PNBP`, `BLU`)
+- `status`: enum(`DRAFT`, `SUBMITTED`, `IN_REVIEW`, `REVISION_REQUESTED`, `APPROVED`, `LOCKED`)
+- `completeness_score`: number
+- `validity_score`: number
+- `anomaly_flags_json`: string
+- `revision_count`: number
+- `submitted_at`: datetime | null
+- `approved_at`: datetime | null
+- `approved_by`: string | null
+- `revision_requested_at`: datetime | null
+- `revision_note`: string | null
+- `is_active_version`: boolean
+- `created_at`: datetime
+- `created_by`: string
+- `updated_at`: datetime
+- `updated_by`: string
+
+Kenapa perlu tabel header?
+- supaya workflow, audit, dan status tidak tercampur dengan isi angka laporan.
+
+### 2.6 Tabel `report_pnbp_details`
+Detail angka untuk laporan PNBP.
+
+`report_pnbp_details`
+- `id`: string (PK)
+- `submission_id`: string (FK -> `report_submissions.id`, unique)
+- `pendapatan`: number | null
+- `pengeluaran`: number | null
+- `piutang`: number | null
+- `persediaan`: number | null
+- `hutang`: number | null
+- `sisa_saldo`: number | null
+- `aset_lancar`: number | null
+- `ekuitas`: number | null
+- `current_ratio`: number | null
+- `cash_ratio`: number | null
+- `notes`: string | null
+- `created_at`: datetime
+- `updated_at`: datetime
+
+### 2.7 Tabel `report_blu_details`
+Detail angka untuk laporan BLU.
+
+`report_blu_details`
+- `id`: string (PK)
+- `submission_id`: string (FK -> `report_submissions.id`, unique)
+- `saldo_awal`: number | null
+- `pendapatan`: number | null
+- `pengeluaran`: number | null
+- `piutang`: number | null
+- `persediaan`: number | null
+- `hutang`: number | null
+- `sisa_saldo_akhir`: number | null
+- `aset_lancar`: number | null
+- `ekuitas`: number | null
+- `current_ratio`: number | null
+- `cash_ratio`: number | null
+- `notes`: string | null
+- `created_at`: datetime
+- `updated_at`: datetime
+
+### 2.8 Tabel `revision_comments`
+Komentar revisi dari admin pusat.
+
+`revision_comments`
+- `id`: string (PK)
+- `submission_id`: string (FK -> `report_submissions.id`)
+- `comment_scope`: enum(`GENERAL`, `FIELD`)
+- `field_name`: string | null
+- `comment_text`: string
+- `created_by`: string
+- `created_at`: datetime
+
+### 2.9 Tabel `audit_logs`
+Audit trail sistem.
+
+`audit_logs`
+- `id`: string (PK)
+- `entity_name`: string
+- `entity_id`: string
+- `action`: enum(`CREATE`, `UPDATE`, `DELETE`, `SUBMIT`, `APPROVE`, `REQUEST_REVISION`, `LOGIN`, `LOGOUT`, `LOCK`)
+- `actor_id`: string
+- `actor_name`: string
+- `old_value_json`: string | null
+- `new_value_json`: string | null
+- `metadata_json`: string | null
+- `created_at`: datetime
+
+### 2.10 Tabel `notifications`
+Notifikasi in-app.
+
+`notifications`
+- `id`: string (PK)
+- `user_id`: string (FK -> `users.id`)
+- `title`: string
+- `message`: string
+- `type`: enum(`INFO`, `WARNING`, `SUCCESS`, `ERROR`)
+- `is_read`: boolean
+- `created_at`: datetime
+- `read_at`: datetime | null
+
+### 2.11 Tabel `attachments`
+Untuk lampiran pendukung.
+
+`attachments`
+- `id`: string (PK)
+- `submission_id`: string (FK -> `report_submissions.id`)
+- `file_name`: string
+- `file_url`: string
+- `mime_type`: string
+- `uploaded_by`: string
+- `uploaded_at`: datetime
+
+Catatan:
+- lampiran dapat disimpan di Google Drive, sedangkan URL-nya disimpan di sheet.
+
+### 2.12 Tabel `system_configs`
+Konfigurasi global.
+
+`system_configs`
+- `key`: string (PK)
+- `value`: string
+- `description`: string | null
+- `updated_at`: datetime
+- `updated_by`: string
+
+Contoh `key`:
+- `APP_NAME`
+- `DEFAULT_PERIOD_ID`
+- `ALLOW_EDIT_AFTER_SUBMIT`
+- `EMAIL_NOTIFICATIONS_ENABLED`
+
+### 2.13 Relasi utama
+- `users.rs_id` -> `hospitals.id`
+- `report_submissions.period_id` -> `periods.id`
+- `report_submissions.rs_id` -> `hospitals.id`
+- `report_pnbp_details.submission_id` -> `report_submissions.id`
+- `report_blu_details.submission_id` -> `report_submissions.id`
+- `revision_comments.submission_id` -> `report_submissions.id`
+- `attachments.submission_id` -> `report_submissions.id`
+- `notifications.user_id` -> `users.id`
+
+### 2.14 Constraint penting
+- kombinasi `period_id + rs_id + entity_type + is_active_version=true` harus unik,
+- `submission_id` hanya boleh punya satu detail PNBP atau satu detail BLU,
+- `entity_type=PNBP` hanya boleh dipasangkan dengan `report_pnbp_details`,
+- `entity_type=BLU` hanya boleh dipasangkan dengan `report_blu_details`.
