@@ -138,3 +138,16 @@ function requestRevision(id, note, reviewerId) {
 
   return result.after;
 }
+
+function getReportsExportUrl() {
+  var reportSheet = getSheet('report_submissions');
+  var gid = reportSheet.getSheetId();
+  var spreadsheetId = CONFIG.SHEET_ID;
+  var downloadUrl = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId + '/export?format=xlsx&gid=' + gid;
+
+  return {
+    spreadsheet_id: spreadsheetId,
+    sheet_name: 'report_submissions',
+    download_url: downloadUrl
+  };
+}
