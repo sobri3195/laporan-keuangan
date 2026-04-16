@@ -26,7 +26,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow sm:p-8">
         <div className="mb-6 flex flex-col items-center text-center">
           <img src="/logo-simon.svg" alt="Logo SIMON Keuangan RS" className="mb-3 h-16 w-16 rounded-lg bg-slate-50 p-2" />
-          <h1 className="text-xl font-bold">Login SIMON Keuangan RS</h1>
+          <h1 className="text-xl font-bold">Puskesau SIMON Keuangan RS</h1>
           <p className="text-sm text-slate-500">Akses sistem monitoring laporan keuangan rumah sakit.</p>
         </div>
 

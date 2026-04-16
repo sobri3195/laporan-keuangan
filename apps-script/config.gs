@@ -1,4 +1,40 @@
 var CONFIG = {
-  SHEET_ID: 'TODO_SET_GOOGLE_SHEET_ID',
-  TOKEN_EXPIRY_HOURS: 8
+  SHEET_ID: '1u7ALXSX7sMZ1h-H-RyxXOVUAjT8XYHBIhPp04Sb6FEk',
+  TOKEN_EXPIRY_HOURS: 8,
+  DEFAULT_REPORT_STATUS: 'DRAFT',
+  HEADER_MAP: {
+    users: ['id', 'full_name', 'email', 'role', 'hospital_id', 'is_active', 'created_at', 'updated_at'],
+    hospitals: ['id', 'code', 'name', 'province', 'city', 'class_type', 'active', 'created_at', 'updated_at'],
+    periods: ['id', 'label', 'year', 'month', 'start_date', 'end_date', 'is_locked', 'is_active'],
+    report_submissions: ['id', 'hospital_id', 'period_id', 'entity_type', 'status', 'completeness_score', 'validity_score', 'anomaly_flags_json', 'submitted_at', 'approved_at', 'updated_at'],
+    report_pnbp_details: ['report_id', 'pendapatan', 'pengeluaran', 'sisa_saldo', 'piutang', 'persediaan', 'aset_lancar', 'hutang', 'ekuitas', 'current_ratio', 'cash_ratio'],
+    report_blu_details: ['report_id', 'saldo_awal', 'pendapatan', 'pengeluaran', 'sisa_saldo_akhir', 'piutang', 'persediaan', 'aset_lancar', 'hutang', 'ekuitas', 'current_ratio', 'cash_ratio'],
+    revision_comments: ['id', 'report_id', 'reviewer_id', 'comment', 'created_at'],
+    audit_logs: ['id', 'timestamp', 'actor_user_id', 'action', 'entity', 'entity_id', 'before_json', 'after_json'],
+    notifications: ['id', 'user_id', 'title', 'message', 'is_read', 'created_at', 'read_at'],
+    attachments: ['id', 'report_id', 'drive_file_id', 'filename', 'mime_type', 'uploaded_by', 'uploaded_at'],
+    system_configs: ['key', 'value', 'meta', 'updated_at']
+  },
+  HOSPITAL_SEED_PNBP_2026_Q1: [
+    'RS ANGKATAN UDARA DR. EFRAM HARSANA',
+    'RSAU DR. CHARLES P. J. SUOTH LANUD SAM RATULANGI',
+    'RSAU DR. M. HASSAN TOTO',
+    'RSAU DR. YUNIATI WISMA KARYANI',
+    'RS ANGKATAN UDARA DR. MUNIR LANUD ABDULRACHMAN SALEH',
+    'RSAU DR. HOEDIYONO LANUD SURYADARMA',
+    'RSAU DR. SISWANTO LANUD ADI SOEMARMO',
+    'RS UMUM TK. IV LANUD BALIKPAPAN',
+    'RS GIGI DAN MULUT ANGKATAN UDARA',
+    'RSAU DR. ABDUL MALIK',
+    'KLINIK LANUD EL TARI',
+    'RS ANGKATAN UDARA DR. MOHAMMAD SUTOMO LANUD SUPADIO',
+    'RS UMUM TNI AU LANUD SULAIMAN',
+    'RS AU DR. DODY SARDJOTO',
+    'RS SOEMITRO LANUD MOELJONO SURABAYA',
+    'RS TNI AU SJAMSUDIN NOOR',
+    'RS AU DR. MOHAMMAD MOENIR',
+    'RS ANGKATAN UDARA DR. SUKIRMAN LANUD ROESMIN NURJADIN',
+    'RS AU TKT. IV LANUD SILAS PAPARE',
+    'KLINIK PRATAMA MANUHUA'
+  ]
 };

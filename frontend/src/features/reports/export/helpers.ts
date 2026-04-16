@@ -6,12 +6,13 @@ const MONTH_LABELS_ID = ['JAN', 'FEB', 'MARET', 'APR', 'MEI', 'JUN', 'JUL', 'AGT
 const QUARTER_ROMAN = ['I', 'II', 'III', 'IV'] as const;
 
 const pnbpDetailByReportId: Record<string, Omit<PnbpExportRow, 'hospitalName'>> = {
-  R1: { pendapatan: 1250000000, pengeluaran: 955000000, piutang: 25000000, persediaan: 128000000, hutang: 315000000 },
-  R3: { pendapatan: 980000000, pengeluaran: 810000000, piutang: null, persediaan: 84500000, hutang: 220000000 }
+  'R-PNBP-H1': { pendapatan: 1250000000, pengeluaran: 955000000, piutang: 25000000, persediaan: 128000000, hutang: 315000000 },
+  'R-PNBP-H2': { pendapatan: 980000000, pengeluaran: 810000000, piutang: null, persediaan: 84500000, hutang: 220000000 }
 };
 
 const bluDetailByReportId: Record<string, Omit<BluExportRow, 'hospitalName'>> = {
-  R2: { saldoAwal: 300000000, pendapatan: 1200000000, pengeluaran: 950000000, piutang: 78000000, persediaan: 145000000, hutang: 410000000 }
+  'R-BLU-H1': { saldoAwal: 300000000, pendapatan: 1200000000, pengeluaran: 950000000, piutang: 78000000, persediaan: 145000000, hutang: 410000000 },
+  'R-BLU-H2': { saldoAwal: 220000000, pendapatan: 890000000, pengeluaran: 760000000, piutang: 55000000, persediaan: 110000000, hutang: 280000000 }
 };
 
 export function getQuarterFromMonth(month: number): 1 | 2 | 3 | 4 {
@@ -42,7 +43,7 @@ export function buildPeriodMeta(period: Period): MonitoringPeriodMeta {
 
 export function buildExportFilename(period: MonitoringPeriodMeta, timestamp = new Date()): string {
   const datePart = timestamp.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  return `MONITORING_LAPORAN_KEUANGAN_RS_TNI_AU_TW${period.quarter}_${period.year}_${datePart}.xlsx`;
+  return `MONITORING_LAPORAN_KEUANGAN_RS_TNI_AU_TW${period.quarter}_${period.year}_${datePart}.xls`;
 }
 
 export function buildMockExportRows(periodId?: string): { period: MonitoringPeriodMeta; pnbpRows: PnbpExportRow[]; bluRows: BluExportRow[] } {

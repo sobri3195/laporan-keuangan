@@ -16,6 +16,7 @@ const navs = [
   ['/approvals', '✅', 'Approval & revisi'],
   ['/master/periods', '🗓️', 'Pengaturan periode'],
   ['/exports', '⬇️', 'Laporan & export'],
+  ['/laporan-export', '📗', 'Laporan & Export XLS'],
   ['/audit-logs', '🧷', 'Audit trail'],
   ['/profile', '👤', 'Profil pengguna'],
   ['/notifications', '🔔', 'Notifikasi']
@@ -43,7 +44,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <img src="/logo-simon.svg" alt="Logo SIMON" className="h-10 w-10 rounded bg-white p-1" />
           <div>
             <h1 className="text-base font-bold leading-tight">SIMON Keuangan RS</h1>
-            <p className="text-xs text-blue-100">Kementerian Kesehatan RI</p>
+            <p className="text-xs text-blue-100">Puskesau</p>
           </div>
         </div>
 

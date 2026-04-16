@@ -1,26 +1,71 @@
 import { Hospital, Period, Report, ReportStatus, Role, User } from '../types/domain';
 
-export const hospitals: Hospital[] = [
-  { id: 'H1', code: 'RS001', name: 'RSUP Harapan', province: 'DKI Jakarta', active: true },
-  { id: 'H2', code: 'RS002', name: 'RSUD Sehat Sentosa', province: 'Jawa Barat', active: true },
-  { id: 'H3', code: 'RS003', name: 'RS Islam Amanah', province: 'Jawa Tengah', active: true }
-];
+const hospitalNames = [
+  'RS ANGKATAN UDARA DR. EFRAM HARSANA',
+  'RSAU DR. CHARLES P. J. SUOTH LANUD SAM RATULANGI',
+  'RSAU DR. M. HASSAN TOTO',
+  'RSAU DR. YUNIATI WISMA KARYANI',
+  'RS ANGKATAN UDARA DR. MUNIR LANUD ABDULRACHMAN SALEH',
+  'RSAU DR. HOEDIYONO LANUD SURYADARMA',
+  'RSAU DR. SISWANTO LANUD ADI SOEMARMO',
+  'RS UMUM TK. IV LANUD BALIKPAPAN',
+  'RS GIGI DAN MULUT ANGKATAN UDARA',
+  'RSAU DR. ABDUL MALIK',
+  'KLINIK LANUD EL TARI',
+  'RS ANGKATAN UDARA DR. MOHAMMAD SUTOMO LANUD SUPADIO',
+  'RS UMUM TNI AU LANUD SULAIMAN',
+  'RS AU DR. DODY SARDJOTO',
+  'RS SOEMITRO LANUD MOELJONO SURABAYA',
+  'RS TNI AU SJAMSUDIN NOOR',
+  'RS AU DR. MOHAMMAD MOENIR',
+  'RS ANGKATAN UDARA DR. SUKIRMAN LANUD ROESMIN NURJADIN',
+  'RS AU TKT. IV LANUD SILAS PAPARE',
+  'KLINIK PRATAMA MANUHUA'
+] as const;
+
+export const hospitals: Hospital[] = hospitalNames.map((name, index) => ({
+  id: `H${index + 1}`,
+  code: `RSAU${String(index + 1).padStart(3, '0')}`,
+  name,
+  province: 'Indonesia',
+  active: true
+}));
 
 export const periods: Period[] = [
-  { id: '2026-01', label: 'Januari 2026', year: 2026, month: 1, isLocked: false, isActive: true },
-  { id: '2026-02', label: 'Februari 2026', year: 2026, month: 2, isLocked: false, isActive: true },
-  { id: '2025-12', label: 'Desember 2025', year: 2025, month: 12, isLocked: true, isActive: false }
+  { id: '2026-Q1', label: 'Triwulan I 2026', year: 2026, month: 3, isLocked: false, isActive: true },
+  { id: '2025-Q4', label: 'Triwulan IV 2025', year: 2025, month: 12, isLocked: true, isActive: false }
 ];
 
 export const users: User[] = [
   { id: 'U1', fullName: 'Admin Pusat', email: 'pusat@simon.go.id', role: Role.ADMIN_PUSAT, hospitalId: null },
-  { id: 'U2', fullName: 'Admin RS Harapan', email: 'harapan@simon.go.id', role: Role.ADMIN_RS, hospitalId: 'H1' },
-  { id: 'U3', fullName: 'Admin RS Sehat', email: 'sehat@simon.go.id', role: Role.ADMIN_RS, hospitalId: 'H2' },
+  { id: 'U2', fullName: 'Admin RSAU Efram Harsana', email: 'efram@simon.go.id', role: Role.ADMIN_RS, hospitalId: 'H1' },
+  { id: 'U3', fullName: 'Admin RSAU Charles', email: 'charles@simon.go.id', role: Role.ADMIN_RS, hospitalId: 'H2' },
   { id: 'U4', fullName: 'Viewer Nasional', email: 'viewer@simon.go.id', role: Role.VIEWER, hospitalId: null }
 ];
 
-export const reports: Report[] = [
-  { id: 'R1', hospitalId: 'H1', periodId: '2026-01', entityType: 'PNBP', status: ReportStatus.SUBMITTED, completenessScore: 95, validityScore: 92, anomalyFlags: [], updatedAt: '2026-02-05T07:00:00Z' },
-  { id: 'R2', hospitalId: 'H2', periodId: '2026-01', entityType: 'BLU', status: ReportStatus.REVISION_REQUESTED, completenessScore: 88, validityScore: 70, anomalyFlags: ['PENGELUARAN_GT_PENDAPATAN'], revisionNote: 'Mohon cek kenaikan pengeluaran.', updatedAt: '2026-02-07T04:00:00Z' },
-  { id: 'R3', hospitalId: 'H3', periodId: '2026-01', entityType: 'PNBP', status: ReportStatus.APPROVED, completenessScore: 99, validityScore: 98, anomalyFlags: [], updatedAt: '2026-02-10T10:00:00Z' }
-];
+const now = '2026-04-01T00:00:00Z';
+
+export const reports: Report[] = hospitals.flatMap((hospital) => [
+  {
+    id: `R-PNBP-${hospital.id}`,
+    hospitalId: hospital.id,
+    periodId: '2026-Q1',
+    entityType: 'PNBP' as const,
+    status: ReportStatus.DRAFT,
+    completenessScore: 100,
+    validityScore: 100,
+    anomalyFlags: [],
+    updatedAt: now
+  },
+  {
+    id: `R-BLU-${hospital.id}`,
+    hospitalId: hospital.id,
+    periodId: '2026-Q1',
+    entityType: 'BLU' as const,
+    status: ReportStatus.DRAFT,
+    completenessScore: 100,
+    validityScore: 100,
+    anomalyFlags: [],
+    updatedAt: now
+  }
+]);

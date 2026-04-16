@@ -30,8 +30,8 @@ SIMON Keuangan RS (Sistem Monitoring Laporan Keuangan Rumah Sakit) adalah fondas
 ## Demo Login (Frontend Mock)
 - Email: gunakan salah satu user pada `frontend/src/mocks/seedData.ts`:
   - `pusat@simon.go.id`
-  - `harapan@simon.go.id`
-  - `sehat@simon.go.id`
+  - `efram@simon.go.id`
+  - `charles@simon.go.id`
   - `viewer@simon.go.id`
 - Password (semua akun demo): `simon123`
 

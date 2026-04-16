@@ -1,31 +1,43 @@
 function routeRequest(method, path, payload, token) {
-  if (method === 'POST' && path === '/auth/login') return loginHandler(payload);
-  if (method === 'GET' && path === '/auth/me') return meHandler(token);
+  var clean = cleanPath(path);
 
-  if (method === 'GET' && path === '/hospitals') return listHospitals();
-  if (method === 'POST' && path === '/hospitals') return createHospital(payload);
-  if (method === 'GET' && path === '/users') return readRows('users');
-  if (method === 'POST' && path === '/users') return payload;
-  if (method === 'GET' && path === '/periods') return listPeriods();
-  if (method === 'POST' && path === '/periods') return createPeriod(payload);
+  if (method === 'POST' && clean === '/setup/init') return initWorkbook();
+  if (method === 'POST' && clean === '/setup/seed-hospitals') return seedHospitalsFromTemplate();
 
-  if (method === 'GET' && path === '/reports') return listReports();
-  if (method === 'GET' && path.indexOf('/reports/') === 0) return getReportById(path.split('/')[2]);
-  if (method === 'POST' && path === '/reports/pnbp') return calcPNBP(payload);
-  if (method === 'POST' && path === '/reports/blu') return calcBLU(payload);
+  if (method === 'POST' && clean === '/auth/login') return loginHandler(payload);
+  if (method === 'GET' && clean === '/auth/me') return meHandler(token);
 
-  if (method === 'POST' && path.indexOf('/submit') > -1) return submitReport(path.split('/')[2]);
-  if (method === 'POST' && path.indexOf('/approve') > -1) return approveReport(path.split('/')[2]);
-  if (method === 'POST' && path.indexOf('/request-revision') > -1) return requestRevision(path.split('/')[2], payload.note);
+  if (method === 'GET' && clean === '/hospitals') return listHospitals();
+  if (method === 'POST' && clean === '/hospitals') return createHospital(payload);
+  if (method === 'PUT' && clean.indexOf('/hospitals/') === 0) return updateHospital(clean.split('/')[2], payload);
 
-  if (method === 'GET' && path === '/dashboard/summary') return dashboardSummary();
-  if (method === 'GET' && path === '/dashboard/trends') return dashboardTrends();
-  if (method === 'GET' && path === '/dashboard/rankings') return dashboardRankings();
+  if (method === 'GET' && clean === '/users') return listUsers();
+  if (method === 'POST' && clean === '/users') return createUser(payload);
+  if (method === 'PUT' && clean.indexOf('/users/') === 0) return updateUser(clean.split('/')[2], payload);
 
-  if (method === 'GET' && path === '/monitoring/compliance') return monitoringCompliance();
-  if (method === 'GET' && path === '/notifications') return listNotifications();
-  if (method === 'GET' && path === '/audit-logs') return listAuditLogs();
-  if (method === 'GET' && path === '/exports/reports') return { url: 'TODO_EXPORT_HANDLER' };
+  if (method === 'GET' && clean === '/periods') return listPeriods();
+  if (method === 'POST' && clean === '/periods') return createPeriod(payload);
+  if (method === 'PUT' && clean.indexOf('/periods/') === 0) return updatePeriod(clean.split('/')[2], payload);
 
-  throw new Error('Route not found');
+  if (method === 'GET' && clean === '/reports') return listReports();
+  if (method === 'GET' && clean.indexOf('/reports/') === 0) return getReportById(clean.split('/')[2]);
+  if (method === 'POST' && clean === '/reports/pnbp') return createPnbpReport(payload);
+  if (method === 'POST' && clean === '/reports/blu') return createBluReport(payload);
+
+  if (method === 'POST' && clean.indexOf('/submit') > -1) return submitReport(clean.split('/')[2]);
+  if (method === 'POST' && clean.indexOf('/approve') > -1) return approveReport(clean.split('/')[2]);
+  if (method === 'POST' && clean.indexOf('/request-revision') > -1) {
+    return requestRevision(clean.split('/')[2], payload.note, payload.reviewer_id);
+  }
+
+  if (method === 'GET' && clean === '/dashboard/summary') return dashboardSummary();
+  if (method === 'GET' && clean === '/dashboard/trends') return dashboardTrends();
+  if (method === 'GET' && clean === '/dashboard/rankings') return dashboardRankings();
+
+  if (method === 'GET' && clean === '/monitoring/compliance') return monitoringCompliance();
+  if (method === 'GET' && clean === '/notifications') return listNotifications();
+  if (method === 'GET' && clean === '/audit-logs') return listAuditLogs();
+  if (method === 'GET' && clean === '/exports/reports') return getReportsExportUrl();
+
+  throw new Error('Route not found: ' + method + ' ' + clean);
 }
