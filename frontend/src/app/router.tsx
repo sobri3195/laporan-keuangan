@@ -15,6 +15,7 @@ import AuditLogsPage from '../pages/AuditLogsPage';
 import ProfilePage from '../pages/ProfilePage';
 import ApprovalsPage from '../pages/ApprovalsPage';
 import ExportsPage from '../pages/ExportsPage';
+import ReportExportPage from '../pages/ReportExportPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
 
 export const router = createBrowserRouter([
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
           { path: '/monitoring', element: <MonitoringPage /> },
           { path: '/approvals', element: <ApprovalsPage /> },
           { path: '/exports', element: <ExportsPage /> },
+          { path: '/laporan-export', element: <ReportExportPage /> },
           { path: '/notifications', element: <NotificationsPage /> },
           { path: '/audit-logs', element: <AuditLogsPage /> },
           { path: '/profile', element: <ProfilePage /> }
