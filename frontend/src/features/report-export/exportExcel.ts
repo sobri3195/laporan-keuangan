@@ -33,6 +33,20 @@ type RowLike = {
   eachCell: (callback: (cell: CellLike) => void) => void;
 };
 
+type ThinBorder = {
+  top: { style: 'thin' };
+  left: { style: 'thin' };
+  right: { style: 'thin' };
+  bottom: { style: 'thin' };
+};
+
+const createThinBorder = (): ThinBorder => ({
+  top: { style: 'thin' },
+  left: { style: 'thin' },
+  right: { style: 'thin' },
+  bottom: { style: 'thin' }
+});
+
 const baseColumns = [
   'Periode',
   'Rumah Sakit',
@@ -93,12 +107,7 @@ const fillHeaderStyle = (sheet: WorksheetLike, rowIndex: number) => {
     cell.font = { name: 'Arial', bold: true, size: 10 };
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEDE9FE' } };
-    cell.border = {
-      top: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' },
-      bottom: { style: 'thin' }
-    };
+    cell.border = createThinBorder() as unknown;
   });
 };
 
@@ -106,12 +115,7 @@ const fillBodyStyle = (sheet: WorksheetLike, rowIndex: number) => {
   const row = sheet.getRow(rowIndex);
   row.eachCell((cell) => {
     cell.font = { name: 'Arial', size: 10 };
-    cell.border = {
-      top: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' },
-      bottom: { style: 'thin' }
-    };
+    cell.border = createThinBorder() as unknown;
   });
 };
 
