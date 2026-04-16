@@ -37,7 +37,7 @@ function routeRequest(method, path, payload, token) {
   if (method === 'GET' && clean === '/monitoring/compliance') return monitoringCompliance();
   if (method === 'GET' && clean === '/notifications') return listNotifications();
   if (method === 'GET' && clean === '/audit-logs') return listAuditLogs();
-  if (method === 'GET' && clean === '/exports/reports') return { url: 'TODO_EXPORT_HANDLER' };
+  if (method === 'GET' && clean === '/exports/reports') return getReportsExportUrl();
 
   throw new Error('Route not found: ' + method + ' ' + clean);
 }
