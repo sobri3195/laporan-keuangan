@@ -10,8 +10,6 @@ import { useAuthStore } from '../store/authStore';
 
 type FormData = ReportPNBPInput & Partial<ReportBLUInput>;
 
-const numberFields: Array<keyof FormData> = ['pendapatan', 'pengeluaran', 'piutang', 'persediaan', 'hutang', 'saldoAwal'];
-
 function toNullableNumber(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
@@ -103,17 +101,38 @@ export default function ReportFormPage() {
     console.log('payload submit final', { entity: resolvedEntity, ...formValue });
   };
 
+  const clearDraft = () => {
+    localStorage.removeItem(storageKey);
+    reset({
+      periodId: periods.find((p) => p.isActive)?.id ?? '',
+      hospitalId: defaultHospitalId,
+      attachment: undefined,
+      pendapatan: undefined,
+      pengeluaran: undefined,
+      piutang: undefined,
+      persediaan: undefined,
+      hutang: undefined,
+      saldoAwal: undefined
+    });
+    setSavedAt(null);
+  };
+
   return (
-    <div className="rounded-xl bg-white p-4 space-y-4">
+    <div className="space-y-4 rounded-xl bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-bold text-lg">Form Input {resolvedEntity}</h2>
-        <p className="text-xs text-slate-500">Autosave: {savedAt ? new Date(savedAt).toLocaleString('id-ID') : 'belum tersimpan'}</p>
+        <div>
+          <h2 className="text-lg font-bold">Form Input {resolvedEntity}</h2>
+          <p className="text-xs text-slate-500">Lengkapi data lalu simpan draft atau submit final.</p>
+        </div>
+        <p className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
+          Autosave: {savedAt ? new Date(savedAt).toLocaleString('id-ID') : 'belum tersimpan'}
+        </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-3">
+      <div className="grid gap-3 md:grid-cols-3">
         <label className="space-y-1 text-sm">
           <span>Periode</span>
-          <select className="w-full rounded border p-2" {...register('periodId')}>
+          <select className="w-full rounded-lg border border-slate-300 p-2" {...register('periodId')}>
             <option value="">Pilih periode</option>
             {periods.map((period) => (
               <option key={period.id} value={period.id}>
@@ -126,7 +145,7 @@ export default function ReportFormPage() {
 
         <label className="space-y-1 text-sm">
           <span>Rumah Sakit</span>
-          <select className="w-full rounded border p-2" {...register('hospitalId')} disabled={user?.role === 'ADMIN_RS'}>
+          <select className="w-full rounded-lg border border-slate-300 p-2" {...register('hospitalId')} disabled={user?.role === 'ADMIN_RS'}>
             <option value="">Pilih rumah sakit</option>
             {hospitals
               .filter((hospital) => hospital.active)
@@ -144,13 +163,13 @@ export default function ReportFormPage() {
           <input
             type="file"
             accept=".pdf,.xls,.xlsx"
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-slate-300 p-2"
             onChange={(event) => setValue('attachment', event.target.files?.[0])}
           />
         </label>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-3">
+      <div className="grid gap-3 md:grid-cols-3">
         {resolvedEntity === 'BLU' && (
           <NumberField label="Saldo Awal" name="saldoAwal" register={register} error={errors.saldoAwal?.message as string | undefined} />
         )}
@@ -163,34 +182,24 @@ export default function ReportFormPage() {
 
       {debtZeroWarning && <p className="rounded bg-amber-50 px-3 py-2 text-sm text-amber-700">⚠️ {debtZeroWarning}</p>}
 
-      <div className="grid md:grid-cols-2 gap-3 text-sm rounded border border-slate-200 p-3 bg-slate-50">
-        <p>Sisa Saldo: {formatCurrency(('sisaSaldo' in calc ? calc.sisaSaldo : calc.sisaSaldoAkhir) ?? null)}</p>
-        <p>Aset Lancar: {formatCurrency(calc.asetLancar ?? null)}</p>
-        <p>Ekuitas: {formatCurrency(calc.ekuitas ?? null)}</p>
-        <p>Current Ratio: {formatRatio(calc.currentRatio)}</p>
-        <p>Cash Ratio: {formatRatio(calc.cashRatio)}</p>
+      <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm md:grid-cols-2 xl:grid-cols-5">
+        <SummaryItem label="Sisa Saldo" value={formatCurrency(('sisaSaldo' in calc ? calc.sisaSaldo : calc.sisaSaldoAkhir) ?? null)} />
+        <SummaryItem label="Aset Lancar" value={formatCurrency(calc.asetLancar ?? null)} />
+        <SummaryItem label="Ekuitas" value={formatCurrency(calc.ekuitas ?? null)} />
+        <SummaryItem label="Current Ratio" value={formatRatio(calc.currentRatio)} />
+        <SummaryItem label="Cash Ratio" value={formatRatio(calc.cashRatio)} />
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={handleSubmit(onSaveDraft)} className="rounded bg-slate-600 px-3 py-2 text-white" disabled={isSubmitting}>
+        <button type="button" onClick={handleSubmit(onSaveDraft)} className="rounded-lg bg-slate-600 px-3 py-2 text-sm font-semibold text-white" disabled={isSubmitting}>
           Simpan Draft
         </button>
-        <button type="button" onClick={handleSubmit(onSubmitFinal)} className="rounded bg-primary px-3 py-2 text-white" disabled={isSubmitting}>
+        <button type="button" onClick={handleSubmit(onSubmitFinal)} className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white" disabled={isSubmitting}>
           Submit Final
         </button>
-      </div>
-
-      <div className="rounded border border-dashed border-slate-300 p-3 text-xs text-slate-600">
-        <p className="font-semibold mb-1">Nilai saat ini (debug):</p>
-        <ul className="space-y-1">
-          {numberFields
-            .filter((field) => field in values)
-            .map((field) => (
-              <li key={String(field)}>
-                {String(field)}: {formatCurrency(toNullableNumber(values[field]))}
-              </li>
-            ))}
-        </ul>
+        <button type="button" onClick={clearDraft} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700" disabled={isSubmitting}>
+          Hapus Draft Lokal
+        </button>
       </div>
     </div>
   );
@@ -210,8 +219,17 @@ function NumberField({
   return (
     <label className="space-y-1 text-sm">
       <span>{label}</span>
-      <input type="number" step="any" className="w-full rounded border p-2" {...register(name, { valueAsNumber: true })} />
+      <input type="number" step="any" className="w-full rounded-lg border border-slate-300 p-2" {...register(name, { valueAsNumber: true })} />
       {error && <p className="text-xs text-red-600">{error}</p>}
     </label>
+  );
+}
+
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-1 font-semibold text-slate-800">{value}</p>
+    </div>
   );
 }
