@@ -12,7 +12,7 @@ export function AppLayout() {
       <main className="flex-1 space-y-4 p-3 sm:p-5">
         <button
           type="button"
-          className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white lg:hidden"
+          className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm lg:hidden"
           onClick={() => setSidebarOpen(true)}
         >
           ☰ Menu

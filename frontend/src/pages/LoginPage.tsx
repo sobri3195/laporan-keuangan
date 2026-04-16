@@ -22,8 +22,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-100 px-4 py-8">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-sm sm:p-8">
+    <div className="grid min-h-screen place-items-center bg-gradient-to-b from-blue-50 to-slate-100 px-4 py-8">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow sm:p-8">
         <div className="mb-6 flex flex-col items-center text-center">
           <img src="/logo-simon.svg" alt="Logo SIMON Keuangan RS" className="mb-3 h-16 w-16 rounded-lg bg-slate-50 p-2" />
           <h1 className="text-xl font-bold">Login SIMON Keuangan RS</h1>
@@ -31,13 +31,13 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <input {...register('email')} placeholder="Email" className="w-full rounded border p-2" />
+          <input {...register('email')} placeholder="Email" className="w-full rounded-lg border border-slate-300 p-2" />
           {errors.email && <p className="text-xs text-rose-600">{errors.email.message}</p>}
 
-          <input {...register('password')} placeholder="Password" type="password" className="w-full rounded border p-2" />
+          <input {...register('password')} placeholder="Password" type="password" className="w-full rounded-lg border border-slate-300 p-2" />
           {errors.password && <p className="text-xs text-rose-600">{errors.password.message}</p>}
 
-          <button disabled={isSubmitting} className="mt-2 w-full rounded bg-primary p-2 text-white disabled:opacity-70">
+          <button disabled={isSubmitting} className="mt-2 w-full rounded-lg bg-primary p-2 font-semibold text-white disabled:opacity-70">
             {isSubmitting ? 'Memproses...' : 'Masuk'}
           </button>
         </form>
