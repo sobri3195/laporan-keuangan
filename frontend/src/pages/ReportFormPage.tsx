@@ -31,11 +31,12 @@ export default function ReportFormPage() {
     register,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
     handleSubmit,
     reset
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    mode: 'onChange',
     defaultValues: {
       periodId: periods.find((p) => p.isActive)?.id ?? '',
       hospitalId: defaultHospitalId,
@@ -49,6 +50,27 @@ export default function ReportFormPage() {
   });
 
   const values = watch();
+  const valuesMap = values as Record<string, unknown>;
+
+  const requiredIdentityFields: Array<FieldPath<FormData>> = ['periodId', 'hospitalId'];
+  const requiredFinancialFields: Array<FieldPath<FormData>> = resolvedEntity === 'BLU'
+    ? ['saldoAwal', 'pendapatan', 'pengeluaran', 'piutang', 'persediaan', 'hutang']
+    : ['pendapatan', 'pengeluaran', 'piutang', 'persediaan', 'hutang'];
+
+  const countFilled = (fields: Array<FieldPath<FormData>>) =>
+    fields.filter((field) => {
+      const value = valuesMap[field];
+      return value !== undefined && value !== null && value !== '' && !(typeof value === 'number' && Number.isNaN(value));
+    }).length;
+
+  const identityFilled = countFilled(requiredIdentityFields);
+  const financialFilled = countFilled(requiredFinancialFields);
+  const identityCompleteness = Math.round((identityFilled / requiredIdentityFields.length) * 100);
+  const financialCompleteness = Math.round((financialFilled / requiredFinancialFields.length) * 100);
+  const totalRequired = requiredIdentityFields.length + requiredFinancialFields.length;
+  const totalFilled = identityFilled + financialFilled;
+  const totalCompleteness = Math.round((totalFilled / totalRequired) * 100);
+  const canSubmitFinal = totalCompleteness === 100 && isValid && !isSubmitting;
 
   const detail = {
     saldoAwal: toNullableNumber(values.saldoAwal),
@@ -124,12 +146,23 @@ export default function ReportFormPage() {
           <h2 className="text-lg font-bold">Form Input {resolvedEntity}</h2>
           <p className="text-xs text-slate-500">Lengkapi data lalu simpan draft atau submit final.</p>
         </div>
-        <p className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
-          Autosave: {savedAt ? new Date(savedAt).toLocaleString('id-ID') : 'belum tersimpan'}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+            Kelengkapan Form: {totalFilled}/{totalRequired} ({totalCompleteness}%)
+          </p>
+          <p className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
+            Autosave: {savedAt ? new Date(savedAt).toLocaleString('id-ID') : 'belum tersimpan'}
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
+        <div className="md:col-span-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Identitas Laporan</p>
+          <p className="text-xs text-slate-500">
+            Kelengkapan section: {identityFilled}/{requiredIdentityFields.length} ({identityCompleteness}%)
+          </p>
+        </div>
         <label className="space-y-1 text-sm">
           <span>Periode</span>
           <select className="w-full rounded-lg border border-slate-300 p-2" {...register('periodId')}>
@@ -170,6 +203,12 @@ export default function ReportFormPage() {
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
+        <div className="md:col-span-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Data Keuangan</p>
+          <p className="text-xs text-slate-500">
+            Kelengkapan section: {financialFilled}/{requiredFinancialFields.length} ({financialCompleteness}%)
+          </p>
+        </div>
         {resolvedEntity === 'BLU' && (
           <NumberField label="Saldo Awal" name="saldoAwal" register={register} error={errors.saldoAwal?.message as string | undefined} />
         )}
@@ -194,7 +233,7 @@ export default function ReportFormPage() {
         <button type="button" onClick={handleSubmit(onSaveDraft)} className="rounded-lg bg-slate-600 px-3 py-2 text-sm font-semibold text-white" disabled={isSubmitting}>
           Simpan Draft
         </button>
-        <button type="button" onClick={handleSubmit(onSubmitFinal)} className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white" disabled={isSubmitting}>
+        <button type="button" onClick={handleSubmit(onSubmitFinal)} className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white" disabled={!canSubmitFinal}>
           Submit Final
         </button>
         <button type="button" onClick={clearDraft} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700" disabled={isSubmitting}>
