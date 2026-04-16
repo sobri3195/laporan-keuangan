@@ -55,36 +55,52 @@ export default function MasterPeriodsPage() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h1 className="text-lg font-semibold text-slate-800">Pengaturan Periode</h1>
-        <p className="text-sm text-slate-600">Kelola periode aktif, status lock, dan pantau deadline pelaporan.</p>
+      <header className="overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 p-5 text-white shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-wider text-indigo-100">Master Data</p>
+        <h1 className="mt-1 text-xl font-semibold">Pengaturan Periode</h1>
+        <p className="mt-2 max-w-2xl text-sm text-indigo-100">
+          Kelola periode aktif, status lock, dan pantau deadline pelaporan agar proses rekapitulasi berjalan tepat waktu.
+        </p>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Total periode" value={summary.total} />
-        <SummaryCard label="Periode aktif" value={summary.activeCount} />
-        <SummaryCard label="Periode terbuka" value={summary.openCount} />
-        <SummaryCard label="Periode terkunci" value={summary.lockedCount} />
+        <SummaryCard label="Total periode" value={summary.total} icon="📅" />
+        <SummaryCard label="Periode aktif" value={summary.activeCount} icon="✅" />
+        <SummaryCard label="Periode terbuka" value={summary.openCount} icon="🔓" />
+        <SummaryCard label="Periode terkunci" value={summary.lockedCount} icon="🔒" />
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid gap-3 md:grid-cols-[1fr_220px]">
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-            placeholder="Cari nama periode..."
-          />
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-          >
-            <option value="ALL">Semua status</option>
-            <option value="ACTIVE">Aktif</option>
-            <option value="OPEN">Terbuka</option>
-            <option value="LOCKED">Locked</option>
-          </select>
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-4 md:grid-cols-[1fr_240px] md:items-end">
+          <label className="space-y-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cari periode</span>
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              placeholder="Contoh: Q1 2026"
+            />
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Filter status</span>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            >
+              <option value="ALL">Semua status</option>
+              <option value="ACTIVE">Aktif</option>
+              <option value="OPEN">Terbuka</option>
+              <option value="LOCKED">Locked</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+          <span className="rounded-full bg-slate-100 px-2.5 py-1">Menampilkan {filteredPeriods.length} dari {summary.total} periode</span>
+          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">{summary.activeCount} aktif</span>
+          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">{summary.openCount} terbuka</span>
+          <span className="rounded-full bg-rose-50 px-2.5 py-1 text-rose-700">{summary.lockedCount} locked</span>
         </div>
       </section>
 
@@ -116,14 +132,14 @@ export default function MasterPeriodsPage() {
             render: (period) => (
               <div className="flex gap-2">
                 <button
-                  className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100"
                   onClick={() => setActivePeriod(period.id)}
                   type="button"
                 >
                   Jadikan aktif
                 </button>
                 <button
-                  className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
                   onClick={() => toggleLock(period.id)}
                   type="button"
                 >
@@ -138,10 +154,15 @@ export default function MasterPeriodsPage() {
   );
 }
 
-function SummaryCard({ label, value }: { label: string; value: number }) {
+function SummaryCard({ label, value, icon }: { label: string; value: number; icon: string }) {
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-sm text-slate-600">{label}</p>
+    <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-slate-600">{label}</p>
+        <span className="text-lg" aria-hidden="true">
+          {icon}
+        </span>
+      </div>
       <p className="mt-1 text-2xl font-semibold text-slate-900">{value}</p>
     </article>
   );
