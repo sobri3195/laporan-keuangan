@@ -84,6 +84,3 @@ export function buildMockExportRows(periodId?: string): { period: MonitoringPeri
   return { period, pnbpRows, bluRows };
 }
 
-export function toExcelNumber(value: number | null | undefined): number | null {
-  return typeof value === 'number' ? value : null;
-}
