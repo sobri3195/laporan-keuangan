@@ -12,8 +12,8 @@ function doGet(e) {
 function doPost(e) {
   try {
     var payload = parseBody(e);
-    var path = payload.path;
-    var method = payload.method || 'POST';
+    var path = payload.path || '/';
+    var method = (payload.method || 'POST').toUpperCase();
     var token = payload.token || '';
     var data = routeRequest(method, path, payload.data || {}, token);
     return jsonResponse(true, data, null);
