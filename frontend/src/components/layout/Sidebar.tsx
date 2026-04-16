@@ -16,6 +16,7 @@ const navs = [
   ['/approvals', '✅', 'Approval & revisi'],
   ['/master/periods', '🗓️', 'Pengaturan periode'],
   ['/exports', '⬇️', 'Laporan & export'],
+  ['/laporan-export', '📗', 'Laporan & Export XLS'],
   ['/audit-logs', '🧷', 'Audit trail'],
   ['/profile', '👤', 'Profil pengguna'],
   ['/notifications', '🔔', 'Notifikasi']
