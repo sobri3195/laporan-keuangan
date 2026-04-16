@@ -42,7 +42,7 @@ export function buildPeriodMeta(period: Period): MonitoringPeriodMeta {
 
 export function buildExportFilename(period: MonitoringPeriodMeta, timestamp = new Date()): string {
   const datePart = timestamp.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  return `MONITORING_LAPORAN_KEUANGAN_RS_TNI_AU_TW${period.quarter}_${period.year}_${datePart}.xlsx`;
+  return `MONITORING_LAPORAN_KEUANGAN_RS_TNI_AU_TW${period.quarter}_${period.year}_${datePart}.xls`;
 }
 
 export function buildMockExportRows(periodId?: string): { period: MonitoringPeriodMeta; pnbpRows: PnbpExportRow[]; bluRows: BluExportRow[] } {
@@ -83,4 +83,3 @@ export function buildMockExportRows(periodId?: string): { period: MonitoringPeri
 
   return { period, pnbpRows, bluRows };
 }
-

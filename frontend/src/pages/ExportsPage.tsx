@@ -3,7 +3,7 @@ import { reports } from '../mocks/seedData';
 import { MonitoringExcelExportButtons } from '../features/reports/export/MonitoringExcelExportButtons';
 
 const exportFormats = [
-  { id: 'xlsx', label: 'Export Excel (.xlsx)' },
+  { id: 'xls', label: 'Export Excel (.xls)' },
   { id: 'pdf', label: 'Export PDF (.pdf)' },
   { id: 'csv', label: 'Export CSV (.csv)' }
 ];

@@ -192,10 +192,10 @@ export default function ReportFormPage() {
         </label>
 
         <label className="space-y-1 text-sm">
-          <span>Lampiran (opsional, PDF/Excel)</span>
+          <span>Lampiran (opsional, PDF/XLS)</span>
           <input
             type="file"
-            accept=".pdf,.xls,.xlsx"
+            accept=".pdf,.xls"
             className="w-full rounded-lg border border-slate-300 p-2"
             onChange={(event) => setValue('attachment', event.target.files?.[0])}
           />

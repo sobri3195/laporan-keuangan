@@ -50,7 +50,7 @@ export async function exportMonitoringWorkbook({ period, pnbpRows, bluRows }: Ex
     })
   ].join('\n');
 
-  downloadBlob(csvContent, buildExportFilename(period).replace(/\.xlsx$/, '.csv'), 'text/csv;charset=utf-8;');
+  downloadBlob(csvContent, buildExportFilename(period), 'application/vnd.ms-excel;charset=utf-8;');
 }
 
 function buildSectionLines({
