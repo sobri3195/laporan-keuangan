@@ -41,13 +41,11 @@ export const router = createBrowserRouter([
           { path: '/laporan-export', element: <ReportExportPage /> },
           { path: '/notifications', element: <NotificationsPage /> },
           { path: '/audit-logs', element: <AuditLogsPage /> },
-          { path: '/profile', element: <ProfilePage /> }
-        ]
-      },
-      {
-        element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT]} />,
-        children: [
-          { path: '/master/periods', element: <MasterPeriodsPage /> }
+          { path: '/profile', element: <ProfilePage /> },
+          {
+            element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT]} />,
+            children: [{ path: '/master/periods', element: <MasterPeriodsPage /> }]
+          }
         ]
       }
     ]
