@@ -36,7 +36,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     ...(canSeeApprovals ? [['/approvals', '✅', 'Approval & revisi']] : []),
     ...(isAdminPusat
       ? [
+          ['/dashboard/executive', '🏛️', 'Dashboard eksekutif'],
           ['/master/periods', '🗓️', 'Pengaturan periode'],
+          ['/master/users', '👥', 'Master pengguna'],
+          ['/master/hospitals', '🏥', 'Master rumah sakit'],
           ['/audit-logs', '🧷', 'Audit trail']
         ]
       : [])

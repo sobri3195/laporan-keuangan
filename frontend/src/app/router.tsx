@@ -17,6 +17,8 @@ import ApprovalsPage from '../pages/ApprovalsPage';
 import ExportsPage from '../pages/ExportsPage';
 import ReportExportPage from '../pages/ReportExportPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
+import MasterUsersPage from '../pages/MasterUsersPage';
+import MasterHospitalsPage from '../pages/MasterHospitalsPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -59,7 +61,11 @@ export const router = createBrowserRouter([
           },
           {
             element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT]} />,
-            children: [{ path: '/master/periods', element: <MasterPeriodsPage /> }]
+            children: [
+              { path: '/master/periods', element: <MasterPeriodsPage /> },
+              { path: '/master/users', element: <MasterUsersPage /> },
+              { path: '/master/hospitals', element: <MasterHospitalsPage /> }
+            ]
           }
         ]
       }
