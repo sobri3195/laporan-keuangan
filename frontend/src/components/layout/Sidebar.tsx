@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { useAuthStore } from '../../store/authStore';
+import { Role } from '../../types/domain';
 
 type SidebarProps = {
   isOpen: boolean;
@@ -9,21 +10,37 @@ type SidebarProps = {
 
 const navs = [
   ['/dashboard', '📊', 'Dashboard utama'],
-  ['/reports/pnbp/new', '🧾', 'Data input PNBP'],
-  ['/reports/blu/new', '🏥', 'Data input BLU'],
   ['/reports', '📁', 'Daftar laporan'],
   ['/monitoring', '🛰️', 'Monitoring status RS'],
-  ['/approvals', '✅', 'Approval & revisi'],
-  ['/master/periods', '🗓️', 'Pengaturan periode'],
   ['/exports', '⬇️', 'Laporan & export'],
   ['/laporan-export', '📗', 'Laporan & Export XLS'],
-  ['/audit-logs', '🧷', 'Audit trail'],
   ['/profile', '👤', 'Profil pengguna'],
   ['/notifications', '🔔', 'Notifikasi']
 ] as const;
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, logout } = useAuthStore();
+  const role = user?.role;
+  const isAdminPusat = role === Role.ADMIN_PUSAT;
+  const canInputReport = role === Role.ADMIN_PUSAT || role === Role.ADMIN_RS;
+  const canSeeApprovals = role === Role.ADMIN_PUSAT;
+
+  const visibleNavs = [
+    ...navs,
+    ...(canInputReport
+      ? [
+          ['/reports/pnbp/new', '🧾', 'Data input PNBP'],
+          ['/reports/blu/new', '🏥', 'Data input BLU']
+        ]
+      : []),
+    ...(canSeeApprovals ? [['/approvals', '✅', 'Approval & revisi']] : []),
+    ...(isAdminPusat
+      ? [
+          ['/master/periods', '🗓️', 'Pengaturan periode'],
+          ['/audit-logs', '🧷', 'Audit trail']
+        ]
+      : [])
+  ] as const;
 
   return (
     <>
@@ -49,7 +66,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         <nav className="mt-4 flex-1 space-y-1 overflow-y-auto pr-1">
-          {navs.map(([to, icon, label]) => (
+          {visibleNavs.map(([to, icon, label]) => (
             <NavLink
               key={to}
               to={to}
