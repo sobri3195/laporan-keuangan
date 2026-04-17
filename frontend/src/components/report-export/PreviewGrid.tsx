@@ -1,37 +1,20 @@
-import clsx from 'clsx';
-import { SpreadsheetCell } from '../../features/report-export/types';
+import { PreviewRow as PreviewRowType } from '../../features/report-export/previewTypes';
+import { PreviewRow } from './PreviewRow';
 
-export function PreviewGrid({ headers, rows }: { headers: string[]; rows: SpreadsheetCell[][] }) {
+type Props = {
+  rows: PreviewRowType[];
+  zoom: 90 | 100 | 125;
+};
+
+export function PreviewGrid({ rows, zoom }: Props) {
+  const scale = zoom / 100;
+
   return (
-    <div className="overflow-auto border border-slate-300">
-      <table className="w-full border-collapse text-xs">
-        <thead>
-          <tr>
-            {headers.map((header) => (
-              <th key={header} className="border border-slate-300 bg-violet-100 p-2 text-center font-semibold text-slate-700">
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
+    <div className="overflow-x-auto border border-slate-300 bg-white">
+      <table className="w-full min-w-max border-collapse font-[Arial,_ui-sans-serif] text-xs">
         <tbody>
-          {rows.map((row, idx) => (
-            <tr key={idx}>
-              {row.map((cell, cellIdx) => (
-                <td
-                  key={cellIdx}
-                  className={clsx('border border-slate-300 p-2 align-middle', {
-                    'text-left': cell.align !== 'center' && cell.align !== 'right',
-                    'text-center': cell.align === 'center',
-                    'text-right': cell.align === 'right',
-                    'font-semibold': cell.bold,
-                    [cell.bgClass || '']: Boolean(cell.bgClass)
-                  })}
-                >
-                  {cell.value}
-                </td>
-              ))}
-            </tr>
+          {rows.map((row) => (
+            <PreviewRow key={row.key} row={row} scale={scale} />
           ))}
         </tbody>
       </table>

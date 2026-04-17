@@ -114,12 +114,17 @@ export default function ReportExportPage() {
 
       <div>
         <h2 className="mb-2 text-sm font-semibold text-slate-700">Area Preview XLS</h2>
-        <div className="mb-2 flex gap-2">
-          <button className="rounded border border-slate-300 px-3 py-2 text-xs" onClick={() => void refreshPreview()}>
-            Refresh Preview
-          </button>
-        </div>
-        <SpreadsheetPreview report={selected} hospitals={hospitals} periods={periods} />
+        <SpreadsheetPreview
+          activeReport={selected}
+          reports={reports}
+          hospitals={hospitals}
+          periods={periods}
+          loading={loading}
+          error={error}
+          onRefresh={() => void refreshPreview()}
+          onExportCurrent={(entityType) => void exportMonitoringWorkbook(reports.filter((row) => row.entityType === entityType), filters.period, 'filtered', 'xlsx')}
+          onExportAll={() => void exportMonitoringWorkbook(reports, filters.period, 'filtered', 'xlsx')}
+        />
       </div>
 
       <ReportFormModal

@@ -1,4 +1,5 @@
 import { saveAs } from './helpers';
+import { PREVIEW_COLUMNS, getSheetName } from './selectors';
 import { ReportEntityType, ReportRecord } from './types';
 
 type ExportMode = 'filtered' | 'template';
@@ -14,7 +15,6 @@ type ExcelJsModule = {
 
 type WorksheetLike = {
   columns: Array<{ header: string; width: number }>;
-  addWorksheet?: never;
   mergeCells: (range: string) => void;
   getCell: (address: string) => CellLike;
   getRow: (index: number) => RowLike;
@@ -34,36 +34,22 @@ type RowLike = {
   eachCell: (callback: (cell: CellLike) => void) => void;
 };
 
-type ThinBorder = {
-  top: { style: 'thin' };
-  left: { style: 'thin' };
-  right: { style: 'thin' };
-  bottom: { style: 'thin' };
-};
+type ColumnKey =
+  | 'hospitalName'
+  | 'saldoAwal'
+  | 'pendapatan'
+  | 'pengeluaran'
+  | 'sisaSaldo'
+  | 'sisaSaldoAkhir'
+  | 'piutang'
+  | 'persediaan'
+  | 'asetLancar'
+  | 'hutang'
+  | 'ekuitas'
+  | 'currentRatio'
+  | 'cashRatio';
 
-const createThinBorder = (): ThinBorder => ({
-  top: { style: 'thin' },
-  left: { style: 'thin' },
-  right: { style: 'thin' },
-  bottom: { style: 'thin' }
-});
-
-const baseColumns = [
-  'Periode',
-  'Rumah Sakit',
-  'Jenis Entitas',
-  'Saldo Awal',
-  'Pendapatan',
-  'Pengeluaran',
-  'Sisa Saldo',
-  'Piutang',
-  'Persediaan',
-  'Hutang',
-  'Aset Lancar',
-  'Ekuitas',
-  'Current Ratio',
-  'Cash Ratio'
-];
+const createThinBorder = () => ({ top: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }, bottom: { style: 'thin' } });
 
 const getExcelJs = async (): Promise<ExcelJsModule | null> => {
   try {
@@ -74,32 +60,7 @@ const getExcelJs = async (): Promise<ExcelJsModule | null> => {
   }
 };
 
-const buildCsvFallback = (rows: ReportRecord[]) => {
-  const header = baseColumns.join(',');
-  const body = rows
-    .map((row) =>
-      [
-        row.period,
-        row.hospitalId,
-        row.entityType,
-        row.saldoAwal,
-        row.pendapatan,
-        row.pengeluaran,
-        row.entityType === 'BLU' ? row.sisaSaldoAkhir : row.sisaSaldo,
-        row.piutang,
-        row.persediaan,
-        row.hutang,
-        row.asetLancar,
-        row.ekuitas,
-        row.currentRatio == null ? 'N/A' : row.currentRatio,
-        row.cashRatio == null ? 'N/A' : row.cashRatio
-      ]
-        .map((value) => (value == null ? '' : value))
-        .join(',')
-    )
-    .join('\n');
-  return `${header}\n${body}`;
-};
+const fileName = (period: string, fileType: ExportFileType) => `MONITORING_LAPORAN_KEUANGAN_RS_${period || 'ALL'}_${Date.now()}.${fileType}`;
 
 const fillHeaderStyle = (sheet: WorksheetLike, rowIndex: number) => {
   const row = sheet.getRow(rowIndex);
@@ -120,72 +81,97 @@ const fillBodyStyle = (sheet: WorksheetLike, rowIndex: number) => {
   });
 };
 
-const buildSheet = (workbook: ExcelJsModule['Workbook'] extends new () => infer T ? T : never, sheetName: string, rows: ReportRecord[], entityType: ReportEntityType, formalTemplate = false) => {
-  const sheet = workbook.addWorksheet(sheetName);
-  sheet.columns = baseColumns.map((name) => ({ header: name, width: 17 }));
-  sheet.mergeCells('A1:N1');
+const getColumnValue = (record: ReportRecord, key: ColumnKey) => {
+  switch (key) {
+    case 'hospitalName':
+      return record.hospitalId;
+    case 'saldoAwal':
+      return record.saldoAwal;
+    case 'pendapatan':
+      return record.pendapatan;
+    case 'pengeluaran':
+      return record.pengeluaran;
+    case 'sisaSaldo':
+      return record.sisaSaldo;
+    case 'sisaSaldoAkhir':
+      return record.sisaSaldoAkhir;
+    case 'piutang':
+      return record.piutang;
+    case 'persediaan':
+      return record.persediaan;
+    case 'asetLancar':
+      return record.asetLancar;
+    case 'hutang':
+      return record.hutang;
+    case 'ekuitas':
+      return record.ekuitas;
+    case 'currentRatio':
+      return record.currentRatio == null ? 'N/A' : record.currentRatio;
+    case 'cashRatio':
+      return record.cashRatio == null ? 'N/A' : record.cashRatio;
+  }
+};
+
+const buildSheet = (
+  workbook: ExcelJsModule['Workbook'] extends new () => infer T ? T : never,
+  entityType: ReportEntityType,
+  periodLabel: string,
+  rows: ReportRecord[],
+  formalTemplate = false
+) => {
+  const columns = PREVIEW_COLUMNS[entityType];
+  const sheet = workbook.addWorksheet(getSheetName(entityType, periodLabel));
+  const lastColLetter = String.fromCharCode(65 + columns.length - 1);
+
+  sheet.columns = columns.map((column) => ({ header: column.label, width: column.width ?? 17 }));
+
+  sheet.mergeCells(`A1:${lastColLetter}1`);
   sheet.getCell('A1').value = 'MONITORING LAPORAN KEUANGAN RUMAH SAKIT';
   sheet.getCell('A1').font = { name: 'Arial', bold: true, size: 13 };
   sheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
   sheet.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB7E1CD' } };
-  sheet.mergeCells('A2:N2');
-  sheet.getCell('A2').value = `${entityType} - Template Monitoring ${formalTemplate ? '(Template Format)' : ''}`;
+
+  sheet.mergeCells(`A2:${lastColLetter}2`);
+  sheet.getCell('A2').value = `${entityType} - ${periodLabel}${formalTemplate ? ' (Template Format)' : ''}`;
   sheet.getCell('A2').alignment = { horizontal: 'center' };
   sheet.getCell('A2').font = { name: 'Arial', bold: true, size: 11 };
-  sheet.getRow(4).values = baseColumns;
+
+  sheet.getRow(4).values = columns.map((column) => column.label);
   fillHeaderStyle(sheet, 4);
+
   let rowStart = 5;
   rows.forEach((record) => {
     const rowIndex = rowStart++;
-    sheet.getCell(`A${rowIndex}`).value = record.period;
-    sheet.getCell(`B${rowIndex}`).value = record.hospitalId;
-    sheet.getCell(`C${rowIndex}`).value = record.entityType;
-    sheet.getCell(`D${rowIndex}`).value = record.entityType === 'BLU' ? record.saldoAwal : null;
-    sheet.getCell(`E${rowIndex}`).value = record.pendapatan;
-    sheet.getCell(`F${rowIndex}`).value = record.pengeluaran;
-    sheet.getCell(`G${rowIndex}`).value = {
-      formula: record.entityType === 'BLU' ? `IF(AND(D${rowIndex}="",E${rowIndex}="",F${rowIndex}=""),"",D${rowIndex}+E${rowIndex}-F${rowIndex})` : `IF(AND(E${rowIndex}="",F${rowIndex}=""),"",E${rowIndex}-F${rowIndex})`
-    };
-    sheet.getCell(`H${rowIndex}`).value = record.piutang;
-    sheet.getCell(`I${rowIndex}`).value = record.persediaan;
-    sheet.getCell(`J${rowIndex}`).value = record.hutang;
-    sheet.getCell(`K${rowIndex}`).value = { formula: `IF(AND(G${rowIndex}="",H${rowIndex}="",I${rowIndex}=""),"",G${rowIndex}+H${rowIndex}+I${rowIndex})` };
-    sheet.getCell(`L${rowIndex}`).value = { formula: `IF(OR(K${rowIndex}="",J${rowIndex}=""),"",K${rowIndex}-J${rowIndex})` };
-    sheet.getCell(`M${rowIndex}`).value = { formula: `IF(OR(J${rowIndex}=0,J${rowIndex}="",K${rowIndex}=""),"N/A",K${rowIndex}/J${rowIndex})` };
-    sheet.getCell(`N${rowIndex}`).value = { formula: `IF(OR(J${rowIndex}=0,J${rowIndex}="",G${rowIndex}=""),"N/A",G${rowIndex}/J${rowIndex})` };
+    columns.forEach((column, idx) => {
+      const address = `${String.fromCharCode(65 + idx)}${rowIndex}`;
+      sheet.getCell(address).value = getColumnValue(record, column.key as ColumnKey);
+    });
     fillBodyStyle(sheet, rowIndex);
   });
 };
 
-const filename = (period: string, fileType: ExportFileType) => `MONITORING_LAPORAN_KEUANGAN_RS_${period || 'ALL'}_${Date.now()}.${fileType}`;
-
-const buildHtmlWorkbook = (rows: ReportRecord[]) => {
-  const headers = baseColumns.map((column) => `<th style="background:#ede9fe;border:1px solid #94a3b8;padding:6px;">${column}</th>`).join('');
+const buildCsvFallback = (rows: ReportRecord[]) => {
+  const headers = Array.from(new Set([...PREVIEW_COLUMNS.PNBP, ...PREVIEW_COLUMNS.BLU].map((item) => item.label))).join(',');
   const body = rows
     .map((row) => {
-      const sisaSaldoValue = row.entityType === 'BLU' ? row.sisaSaldoAkhir : row.sisaSaldo;
-      return `<tr>${[
-        row.period,
-        row.hospitalId,
-        row.entityType,
-        row.saldoAwal,
-        row.pendapatan,
-        row.pengeluaran,
-        sisaSaldoValue,
-        row.piutang,
-        row.persediaan,
-        row.hutang,
-        row.asetLancar,
-        row.ekuitas,
-        row.currentRatio == null ? 'N/A' : row.currentRatio,
-        row.cashRatio == null ? 'N/A' : row.cashRatio
-      ]
-        .map((value) => `<td style="border:1px solid #94a3b8;padding:6px;">${value == null ? '' : value}</td>`)
-        .join('')}</tr>`;
+      const cols = PREVIEW_COLUMNS[row.entityType];
+      return cols.map((col) => getColumnValue(row, col.key as ColumnKey) ?? '').join(',');
+    })
+    .join('\n');
+  return `${headers}\n${body}`;
+};
+
+const buildHtmlWorkbook = (rows: ReportRecord[]) => {
+  const headers = Array.from(new Set([...PREVIEW_COLUMNS.PNBP, ...PREVIEW_COLUMNS.BLU].map((item) => item.label)));
+  const headerHtml = headers.map((column) => `<th style="background:#ede9fe;border:1px solid #94a3b8;padding:6px;">${column}</th>`).join('');
+  const bodyHtml = rows
+    .map((row) => {
+      const values = PREVIEW_COLUMNS[row.entityType].map((column) => getColumnValue(row, column.key as ColumnKey) ?? '');
+      return `<tr>${values.map((value) => `<td style="border:1px solid #94a3b8;padding:6px;">${value}</td>`).join('')}</tr>`;
     })
     .join('');
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;"><thead><tr>${headers}</tr></thead><tbody>${body}</tbody></table></body></html>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></body></html>`;
 };
 
 export const exportMonitoringWorkbook = async (
@@ -197,7 +183,7 @@ export const exportMonitoringWorkbook = async (
   if (fileType === 'xls') {
     const html = buildHtmlWorkbook(rows);
     const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    saveAs(blob, filename(period, 'xls'));
+    saveAs(blob, fileName(period, 'xls'));
     return;
   }
 
@@ -205,16 +191,17 @@ export const exportMonitoringWorkbook = async (
   if (!ExcelJS) {
     const csv = buildCsvFallback(rows);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, filename(period, 'xlsx').replace('.xlsx', '.csv'));
+    saveAs(blob, fileName(period, 'xlsx').replace('.xlsx', '.csv'));
     return;
   }
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'SIMON Keuangan RS';
-  buildSheet(workbook, 'PNBP TW 1 TA 2026', rows.filter((row) => row.entityType === 'PNBP'), 'PNBP', mode === 'template');
-  buildSheet(workbook, 'BLU TW I TA 2026', rows.filter((row) => row.entityType === 'BLU'), 'BLU', mode === 'template');
+
+  buildSheet(workbook, 'PNBP', period || 'TW 1 TA 2026', rows.filter((row) => row.entityType === 'PNBP'), mode === 'template');
+  buildSheet(workbook, 'BLU', period || 'TW I TA 2026', rows.filter((row) => row.entityType === 'BLU'), mode === 'template');
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, filename(period, 'xlsx'));
+  saveAs(blob, fileName(period, 'xlsx'));
 };
