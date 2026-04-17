@@ -2,6 +2,7 @@ import { saveAs } from './helpers';
 import { ReportEntityType, ReportRecord } from './types';
 
 type ExportMode = 'filtered' | 'template';
+type ExportFileType = 'xlsx' | 'xls';
 
 type ExcelJsModule = {
   Workbook: new () => {
@@ -156,14 +157,55 @@ const buildSheet = (workbook: ExcelJsModule['Workbook'] extends new () => infer 
   });
 };
 
-const filename = (period: string) => `MONITORING_LAPORAN_KEUANGAN_RS_${period || 'ALL'}_${Date.now()}.xlsx`;
+const filename = (period: string, fileType: ExportFileType) => `MONITORING_LAPORAN_KEUANGAN_RS_${period || 'ALL'}_${Date.now()}.${fileType}`;
 
-export const exportMonitoringWorkbook = async (rows: ReportRecord[], period: string, mode: ExportMode = 'filtered') => {
+const buildHtmlWorkbook = (rows: ReportRecord[]) => {
+  const headers = baseColumns.map((column) => `<th style="background:#ede9fe;border:1px solid #94a3b8;padding:6px;">${column}</th>`).join('');
+  const body = rows
+    .map((row) => {
+      const sisaSaldoValue = row.entityType === 'BLU' ? row.sisaSaldoAkhir : row.sisaSaldo;
+      return `<tr>${[
+        row.period,
+        row.hospitalId,
+        row.entityType,
+        row.saldoAwal,
+        row.pendapatan,
+        row.pengeluaran,
+        sisaSaldoValue,
+        row.piutang,
+        row.persediaan,
+        row.hutang,
+        row.asetLancar,
+        row.ekuitas,
+        row.currentRatio == null ? 'N/A' : row.currentRatio,
+        row.cashRatio == null ? 'N/A' : row.cashRatio
+      ]
+        .map((value) => `<td style="border:1px solid #94a3b8;padding:6px;">${value == null ? '' : value}</td>`)
+        .join('')}</tr>`;
+    })
+    .join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;"><thead><tr>${headers}</tr></thead><tbody>${body}</tbody></table></body></html>`;
+};
+
+export const exportMonitoringWorkbook = async (
+  rows: ReportRecord[],
+  period: string,
+  mode: ExportMode = 'filtered',
+  fileType: ExportFileType = 'xlsx'
+) => {
+  if (fileType === 'xls') {
+    const html = buildHtmlWorkbook(rows);
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    saveAs(blob, filename(period, 'xls'));
+    return;
+  }
+
   const ExcelJS = await getExcelJs();
   if (!ExcelJS) {
     const csv = buildCsvFallback(rows);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, filename(period).replace('.xlsx', '.csv'));
+    saveAs(blob, filename(period, 'xlsx').replace('.xlsx', '.csv'));
     return;
   }
 
@@ -174,5 +216,5 @@ export const exportMonitoringWorkbook = async (rows: ReportRecord[], period: str
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, filename(period));
+  saveAs(blob, filename(period, 'xlsx'));
 };

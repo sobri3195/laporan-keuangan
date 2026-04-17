@@ -98,10 +98,10 @@ export default function ReportExportPage() {
           <button className="rounded bg-primary px-3 py-2 text-sm font-semibold text-white" onClick={() => setModalOpen(true)}>
             Tambah Data
           </button>
-          <button className="rounded bg-indigo-600 px-3 py-2 text-sm font-semibold text-white" onClick={() => void exportMonitoringWorkbook(reports, filters.period, 'filtered')}>
+          <button className="rounded bg-indigo-600 px-3 py-2 text-sm font-semibold text-white" onClick={() => void exportMonitoringWorkbook(reports, filters.period, 'filtered', 'xls')}>
             Export XLS
           </button>
-          <button className="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white" onClick={() => void exportMonitoringWorkbook(reports, filters.period, 'template')}>
+          <button className="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white" onClick={() => void exportMonitoringWorkbook(reports, filters.period, 'template', 'xlsx')}>
             Export Template Format
           </button>
         </div>
