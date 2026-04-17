@@ -53,6 +53,18 @@ Buat sheet:
 - Placeholder `TODO_*` hanya untuk kredensial/deployment eksternal.
 - Seed frontend ada di `frontend/src/mocks/seedData.ts`.
 
+## Troubleshooting Browser Console Error
+Jika muncul error seperti berikut di browser console:
+- `TypeError: Cannot read properties of null (reading 'querySelector')` dari URL `chrome-extension://...`
+- `Uncaught SyntaxError: Unexpected token 'export'` dari URL `chrome-extension://...`
+
+Kemungkinan besar sumbernya adalah **extension browser**, bukan kode aplikasi SIMON. Langkah verifikasi cepat:
+1. Buka aplikasi pada mode Incognito dengan extension nonaktif.
+2. Atau nonaktifkan extension satu per satu lalu refresh aplikasi.
+3. Pastikan error berasal dari domain aplikasi (`http://localhost:5173`/domain deploy) jika ingin ditindaklanjuti sebagai bug aplikasi.
+
+Selama stack trace menunjuk ke `chrome-extension://...`, error tersebut umumnya aman diabaikan untuk fungsionalitas inti aplikasi.
+
 ## Limitations & Future Migration
 - Google Sheets tidak ideal untuk volume sangat besar dan transaksi paralel tinggi.
 - Session/token di Apps Script masih sederhana, perlu hardening (JWT/OAuth SSO).
