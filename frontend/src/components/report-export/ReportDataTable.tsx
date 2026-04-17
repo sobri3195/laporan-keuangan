@@ -72,9 +72,13 @@ export function ReportDataTable({ data, periods, hospitals, onView, onEdit, onDe
                       Lihat
                     </button>
                     <button className="rounded border border-indigo-300 px-2 py-1 text-xs text-indigo-700" onClick={() => onEdit(row)}>
-                      Edit
+                      {['approved', 'locked'].includes(row.status) ? 'Lihat' : 'Edit'}
                     </button>
-                    <button className="rounded border border-rose-300 px-2 py-1 text-xs text-rose-700" onClick={() => onDelete(row)}>
+                    <button
+                      className="rounded border border-rose-300 px-2 py-1 text-xs text-rose-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={row.status !== 'draft'}
+                      onClick={() => onDelete(row)}
+                    >
                       Hapus
                     </button>
                     <button className="rounded border border-emerald-300 px-2 py-1 text-xs text-emerald-700" onClick={() => onPreview(row)}>
