@@ -29,19 +29,34 @@ export const router = createBrowserRouter([
         children: [
           { path: '/', element: <Navigate to="/dashboard" replace /> },
           { path: '/dashboard', element: <DashboardPage /> },
-          { path: '/dashboard/executive', element: <ExecutiveDashboardPage /> },
-          { path: '/reports', element: <ReportsPage /> },
-          { path: '/reports/pnbp/new', element: <ReportFormPage /> },
-          { path: '/reports/blu/new', element: <ReportFormPage /> },
-          { path: '/reports/:id', element: <ReportDetailPage /> },
-          { path: '/reports/:id/edit', element: <ReportFormPage /> },
-          { path: '/monitoring', element: <MonitoringPage /> },
-          { path: '/approvals', element: <ApprovalsPage /> },
-          { path: '/exports', element: <ExportsPage /> },
-          { path: '/laporan-export', element: <ReportExportPage /> },
-          { path: '/notifications', element: <NotificationsPage /> },
-          { path: '/audit-logs', element: <AuditLogsPage /> },
-          { path: '/profile', element: <ProfilePage /> },
+          {
+            element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT]} />,
+            children: [
+              { path: '/dashboard/executive', element: <ExecutiveDashboardPage /> },
+              { path: '/approvals', element: <ApprovalsPage /> },
+              { path: '/audit-logs', element: <AuditLogsPage /> }
+            ]
+          },
+          {
+            element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT, Role.ADMIN_RS, Role.VIEWER]} />,
+            children: [
+              { path: '/reports', element: <ReportsPage /> },
+              { path: '/reports/:id', element: <ReportDetailPage /> },
+              { path: '/monitoring', element: <MonitoringPage /> },
+              { path: '/exports', element: <ExportsPage /> },
+              { path: '/laporan-export', element: <ReportExportPage /> },
+              { path: '/notifications', element: <NotificationsPage /> },
+              { path: '/profile', element: <ProfilePage /> }
+            ]
+          },
+          {
+            element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT, Role.ADMIN_RS]} />,
+            children: [
+              { path: '/reports/pnbp/new', element: <ReportFormPage /> },
+              { path: '/reports/blu/new', element: <ReportFormPage /> },
+              { path: '/reports/:id/edit', element: <ReportFormPage /> }
+            ]
+          },
           {
             element: <ProtectedRoute allowedRoles={[Role.ADMIN_PUSAT]} />,
             children: [{ path: '/master/periods', element: <MasterPeriodsPage /> }]
