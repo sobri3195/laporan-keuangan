@@ -66,7 +66,9 @@ Kemungkinan besar sumbernya adalah **extension browser**, bukan kode aplikasi SI
 Selama stack trace menunjuk ke `chrome-extension://...`, error tersebut umumnya aman diabaikan untuk fungsionalitas inti aplikasi.
 
 ## Limitations & Future Migration
+
+Dokumen rencana perbaikan enterprise tersedia di `docs/PRODUCTION_READINESS_PLAN.md`.
 - Google Sheets tidak ideal untuk volume sangat besar dan transaksi paralel tinggi.
-- Session/token di Apps Script masih sederhana, perlu hardening (JWT/OAuth SSO).
+- Session/token di Apps Script masih sederhana; saat ini sudah ditambah rate limiting login dasar, namun tetap perlu hardening lanjutan (JWT/OAuth SSO enterprise).
 - Export/attachment masih placeholder fondasi.
 - Rencana migrasi: pindah ke SQL backend (PostgreSQL/MySQL) + service API terpisah untuk concurrency, indexing, dan audit integrity lebih kuat.

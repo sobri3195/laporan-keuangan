@@ -1,6 +1,9 @@
 var CONFIG = {
   SHEET_ID: '1u7ALXSX7sMZ1h-H-RyxXOVUAjT8XYHBIhPp04Sb6FEk',
   TOKEN_EXPIRY_HOURS: 8,
+  LOGIN_MAX_FAILED_ATTEMPTS: 5,
+  LOGIN_ATTEMPT_WINDOW_MINUTES: 15,
+  LOGIN_LOCKOUT_MINUTES: 15,
   DEFAULT_REPORT_STATUS: 'DRAFT',
   HEADER_MAP: {
     users: ['id', 'full_name', 'email', 'role', 'hospital_id', 'is_active', 'created_at', 'updated_at'],
